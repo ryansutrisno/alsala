@@ -1,0 +1,7 @@
+{
+  "name": "Nurul Waqt - Jadwal Sholat",
+  "description": "Aplikasi jadwal sholat modern dengan inspirasi harian bertenaga AI, didesain untuk berbagai ukuran layar.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
