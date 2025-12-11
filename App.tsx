@@ -1,11 +1,15 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { MapPin, Navigation, RefreshCw, Search, X, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { MapPin, Navigation, RefreshCw, Search, X, Loader2, Volume2, VolumeX } from 'lucide-react';
 import Clock from './components/Clock';
 import PrayerList from './components/PrayerList';
 import InspirationCard from './components/InspirationCard';
 import { getPrayerTimes, getNextPrayer, searchLocation } from './services/prayerService';
 import { getDailyInspiration } from './services/quoteService';
 import { Coordinates, PrayerApiResponse, InspirationContent, LocationResult } from './types';
+
+// Audio Sources
+const ADHAN_FAJR_URL = 'https://download.tvquran.com/download/Adhan/Madina/Adhan_Fajr_Madina.mp3';
+const ADHAN_GENERAL_URL = 'https://download.tvquran.com/download/Adhan/Madina/Adhan_Madina.mp3';
 
 const App: React.FC = () => {
   const [coords, setCoords] = useState<Coordinates | null>(null);
@@ -16,6 +20,12 @@ const App: React.FC = () => {
   const [loadingInspiration, setLoadingInspiration] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   
+  // Audio State
+  const [isMuted, setIsMuted] = useState<boolean>(true); // Default muted to comply with browser autoplay policies
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const lastPlayedRef = useRef<string | null>(null); // To prevent looping in the same minute
+
   // Search State
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -42,7 +52,6 @@ const App: React.FC = () => {
       const next = getNextPrayer(data.data.timings);
       setNextPrayer(next);
       
-      // Fetch inspiration based on the *next* prayer context or current time
       if (next) {
          fetchInspiration(next.name);
       } else {
@@ -54,6 +63,7 @@ const App: React.FC = () => {
     setLoading(false);
   }, [fetchInspiration]);
 
+  // Initial Load
   useEffect(() => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -77,19 +87,87 @@ const App: React.FC = () => {
       fetchData(DEFAULT_COORDS);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run once on mount
+  }, []); 
 
-  // Update countdown every minute to refresh "Next Prayer" status
+  // Timer for Next Prayer & Adhan Check
   useEffect(() => {
     const interval = setInterval(() => {
-      if (prayerData) {
-        const next = getNextPrayer(prayerData.data.timings);
-        setNextPrayer(next);
-      }
-    }, 60000);
-    return () => clearInterval(interval);
-  }, [prayerData]);
+      if (!prayerData) return;
 
+      const now = new Date();
+      
+      // Update Next Prayer Countdown
+      const next = getNextPrayer(prayerData.data.timings);
+      setNextPrayer(next);
+
+      // --- ADHAN LOGIC ---
+      const currentTimeStr = now.toLocaleTimeString('id-ID', { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        hour12: false 
+      }).replace('.', ':'); // Ensure format HH:mm matches API
+
+      // Check if current time matches any prayer time
+      Object.entries(prayerData.data.timings).forEach(([name, time]) => {
+        // Clean time string from API (sometimes it has timezone info like "04:30 (WIB)")
+        const cleanTime = time.split(' ')[0]; 
+
+        if (cleanTime === currentTimeStr) {
+          // Prevent re-triggering if already played for this time
+          if (lastPlayedRef.current === `${name}-${cleanTime}`) return;
+
+          // SKIP IMSAK
+          if (name === 'Imsak' || name === 'Sunrise' || name === 'Sunset') return;
+
+          // Trigger Adhan
+          if (!isMuted && audioRef.current) {
+             console.log(`Triggering Adhan for ${name}`);
+             
+             // Select Audio Source
+             if (name === 'Fajr') {
+               audioRef.current.src = ADHAN_FAJR_URL;
+             } else {
+               audioRef.current.src = ADHAN_GENERAL_URL;
+             }
+
+             audioRef.current.play()
+               .then(() => setIsPlaying(true))
+               .catch(e => console.error("Autoplay prevented:", e));
+             
+             lastPlayedRef.current = `${name}-${cleanTime}`;
+          }
+        }
+      });
+
+    }, 1000); // Check every second for precision
+
+    return () => clearInterval(interval);
+  }, [prayerData, isMuted]);
+
+  // Audio Event Listeners
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handleEnded = () => setIsPlaying(false);
+    audio.addEventListener('ended', handleEnded);
+    return () => audio.removeEventListener('ended', handleEnded);
+  }, []);
+
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+    // If we unmute and something should be playing, logic above will catch it in next second tick if time still matches,
+    // or user simply enables it for future adhans.
+    if (audioRef.current) {
+      if (!isMuted) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        setIsPlaying(false);
+      }
+    }
+  };
+
+  // Search Handlers
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
@@ -104,7 +182,7 @@ const App: React.FC = () => {
     const newCoords = {
       latitude: parseFloat(result.lat),
       longitude: parseFloat(result.lon),
-      locationName: result.display_name.split(',')[0] // Take the first part of the address (city name)
+      locationName: result.display_name.split(',')[0]
     };
     setCoords(newCoords);
     fetchData(newCoords);
@@ -115,6 +193,8 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0f172a] relative overflow-x-hidden selection:bg-sky-500/30">
+      {/* Audio Element */}
+      <audio ref={audioRef} className="hidden" />
       
       {/* Background Ambience */}
       <div className="fixed inset-0 z-0 pointer-events-none">
@@ -137,20 +217,35 @@ const App: React.FC = () => {
              </div>
           </div>
 
-          <div className="text-right w-full md:w-auto">
+          <div className="flex flex-col md:flex-row items-end md:items-center gap-3 w-full md:w-auto">
+             {/* Volume Control */}
              <button 
-               onClick={() => setIsSearchOpen(true)}
-               className="flex items-center gap-2 justify-end text-sky-300 text-sm mb-1 ml-auto hover:text-white transition-colors group cursor-pointer"
+                onClick={toggleMute}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                  isMuted 
+                    ? 'bg-red-500/20 text-red-300 hover:bg-red-500/30' 
+                    : 'bg-green-500/20 text-green-300 hover:bg-green-500/30'
+                } ${isPlaying ? 'animate-pulse ring-1 ring-green-400' : ''}`}
              >
-                <MapPin className="w-4 h-4 group-hover:animate-bounce" />
-                <span className="truncate max-w-[200px]">
-                  {coords?.locationName || prayerData?.data.meta.timezone || "Cari Lokasi..."}
-                </span>
-                <span className="text-xs bg-white/10 px-1.5 py-0.5 rounded text-sky-200">Ubah</span>
+                {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                <span>{isMuted ? "Adzan Off" : isPlaying ? "Adzan Berkumandang" : "Adzan On"}</span>
              </button>
-             <p className="text-xs text-gray-500 bg-white/5 py-1 px-3 rounded-full inline-block backdrop-blur-sm">
-                {prayerData?.data.date.hijri.day} {prayerData?.data.date.hijri.month.en} {prayerData?.data.date.hijri.year}
-             </p>
+
+             <div className="text-right">
+                <button 
+                  onClick={() => setIsSearchOpen(true)}
+                  className="flex items-center gap-2 justify-end text-sky-300 text-sm mb-1 ml-auto hover:text-white transition-colors group cursor-pointer"
+                >
+                   <MapPin className="w-4 h-4 group-hover:animate-bounce" />
+                   <span className="truncate max-w-[200px]">
+                     {coords?.locationName || prayerData?.data.meta.timezone || "Cari Lokasi..."}
+                   </span>
+                   <span className="text-xs bg-white/10 px-1.5 py-0.5 rounded text-sky-200">Ubah</span>
+                </button>
+                <p className="text-xs text-gray-500 bg-white/5 py-1 px-3 rounded-full inline-block backdrop-blur-sm">
+                   {prayerData?.data.date.hijri.day} {prayerData?.data.date.hijri.month.en} {prayerData?.data.date.hijri.year}
+                </p>
+             </div>
           </div>
         </header>
 

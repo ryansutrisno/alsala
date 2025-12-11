@@ -10,6 +10,8 @@ Aplikasi ini menyajikan **Inspirasi Harian** berupa kumpulan hadits dan ayat Al-
     *   Menampilkan waktu Imsak, Subuh, Dzuhur, Ashar, Maghrib, dan Isya.
     *   Highlight otomatis pada jadwal sholat yang sedang berlangsung atau akan datang.
     *   Hitung mundur (countdown) menuju waktu sholat berikutnya.
+    *   **Auto Adzan:** Memutar suara Adzan secara otomatis ketika waktu sholat tiba (kecuali Imsak).
+    *   **Adzan Subuh Khusus:** Suara Adzan berbeda untuk waktu Subuh (*Assalatu Khairum Minan Naum*).
 
 2.  **Deteksi & Pencarian Lokasi**
     *   **Otomatis:** Mendeteksi lokasi pengguna menggunakan Geolocation API browser untuk akurasi tinggi.
