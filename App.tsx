@@ -110,7 +110,7 @@ const App: React.FC = () => {
       // Check if current time matches any prayer time
       Object.entries(prayerData.data.timings).forEach(([name, time]) => {
         // Clean time string from API (sometimes it has timezone info like "04:30 (WIB)")
-        const cleanTime = time.split(' ')[0]; 
+        const cleanTime = (time as string).split(' ')[0];  
 
         if (cleanTime === currentTimeStr) {
           // Prevent re-triggering if already played for this time
@@ -266,7 +266,7 @@ const App: React.FC = () => {
                         placeholder="Cari kota (misal: Bandung, Tokyo)" 
                         className="w-full bg-slate-950 text-white border border-white/10 rounded-lg py-3 pl-10 pr-4 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                         autoFocus
                       />
                       <Search className="w-5 h-5 text-gray-500 absolute left-3 top-3.5" />
@@ -360,7 +360,7 @@ const App: React.FC = () => {
         </main>
 
         <footer className="mt-12 text-center text-slate-600 text-sm py-4 border-t border-white/5">
-          <p>&copy; {new Date().getFullYear()} Nurul Waqt. Ditenagai oleh Aladhan API.</p>
+          <p>&copy; {new Date().getFullYear()} Made with ❤️ by <a href="https://ryansutrisno.com" target="_blank" rel="noopener noreferrer">Ryan Sutrisno</a></p>
         </footer>
       </div>
     </div>
