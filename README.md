@@ -1,8 +1,8 @@
-# Nurul Waqt - Jadwal Sholat Digital & Inspirasi AI
+# Nurul Waqt - Jadwal Sholat Digital
 
 **Nurul Waqt** adalah aplikasi web modern yang dirancang untuk menampilkan jadwal sholat yang akurat, estetis, dan responsif. Aplikasi ini cocok digunakan sebagai *display* digital di masjid, rumah, atau kantor (layar besar), maupun diakses melalui perangkat seluler.
 
-Aplikasi ini tidak hanya menampilkan waktu, tetapi juga memberikan sentuhan spiritual melalui **Inspirasi Harian** yang digenerate secara otomatis oleh kecerdasan buatan (AI) Google Gemini, disesuaikan dengan konteks waktu sholat.
+Aplikasi ini menyajikan **Inspirasi Harian** berupa kumpulan hadits dan ayat Al-Qur'an pilihan yang telah dikurasi, tanpa memerlukan koneksi AI eksternal.
 
 ## ✨ Fitur Utama
 
@@ -13,16 +13,16 @@ Aplikasi ini tidak hanya menampilkan waktu, tetapi juga memberikan sentuhan spir
 
 2.  **Deteksi & Pencarian Lokasi**
     *   **Otomatis:** Mendeteksi lokasi pengguna menggunakan Geolocation API browser untuk akurasi tinggi.
-    *   **Manual:** Fitur pencarian kota (Global) menggunakan OpenStreetMap (Nominatim) jika GPS tidak aktif atau ingin melihat jadwal kota lain.
+    *   **Manual:** Fitur pencarian kota (Global) menggunakan OpenStreetMap (Nominatim).
 
-3.  **Inspirasi Harian Bertenaga AI**
-    *   Terintegrasi dengan **Google Gemini 2.5 Flash**.
-    *   Menyajikan kutipan Al-Qur'an, Hadits, atau kata mutiara Islami beserta refleksi singkat yang relevan dengan waktu saat ini.
+3.  **Inspirasi Harian**
+    *   Menampilkan kutipan Al-Qur'an dan Hadits pilihan secara acak.
+    *   Dilengkapi dengan refleksi singkat yang menyejukkan hati.
+    *   Bekerja **Offline** tanpa biaya API.
 
 4.  **Desain UI/UX Modern (Glassmorphism)**
     *   Tampilan antarmuka yang bersih dengan efek *blur* dan transparansi.
     *   **Responsif:** Tata letak grid menyesuaikan secara otomatis dari layar HP (2 kolom), Tablet (3 kolom), hingga Layar Lebar/TV (6 kolom sejajar).
-    *   Animasi halus dan transisi warna yang menenangkan.
 
 ## 🛠️ Teknologi yang Digunakan
 
@@ -32,21 +32,16 @@ Aplikasi ini tidak hanya menampilkan waktu, tetapi juga memberikan sentuhan spir
 *   **Data API:**
     *   [Aladhan API](https://aladhan.com/prayer-times-api): Sumber data jadwal sholat (Default method: Kemenag/ISNA).
     *   [Nominatim (OpenStreetMap)](https://nominatim.org/): Layanan Geocoding untuk pencarian nama kota.
-*   **AI:** [Google Gemini API](https://ai.google.dev/): SDK `@google/genai` untuk konten inspirasi.
 
-## 🚀 Konfigurasi
+## 🚀 Cara Menjalankan
 
-Untuk menjalankan fitur Inspirasi AI, aplikasi ini membutuhkan **API Key** dari Google AI Studio.
-
-1.  Dapatkan API Key di [Google AI Studio](https://aistudio.google.com/).
-2.  Pastikan environment variable `API_KEY` tersedia saat menjalankan aplikasi (jika menggunakan bundler) atau disuntikkan ke dalam process env.
+Cukup buka `index.html` menggunakan live server atau hosting statis apa pun. Tidak diperlukan konfigurasi backend atau API Key.
 
 ## 📂 Struktur File
 
-*   `index.html`: Entry point aplikasi.
-*   `App.tsx`: Komponen utama yang mengatur *state* lokasi, data sholat, dan UI layout.
-*   `services/prayerService.ts`: Logic untuk mengambil data jadwal dari API dan menghitung waktu sholat berikutnya.
-*   `services/geminiService.ts`: Logic untuk berkomunikasi dengan Google Gemini.
+*   `App.tsx`: Komponen utama.
+*   `services/prayerService.ts`: Logic API jadwal sholat.
+*   `services/quoteService.ts`: Kumpulan data inspirasi lokal (Pengganti AI).
 *   `components/`: Folder komponen UI modular (Clock, PrayerList, InspirationCard).
 
 ---

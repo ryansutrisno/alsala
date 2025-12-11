@@ -4,7 +4,7 @@ import Clock from './components/Clock';
 import PrayerList from './components/PrayerList';
 import InspirationCard from './components/InspirationCard';
 import { getPrayerTimes, getNextPrayer, searchLocation } from './services/prayerService';
-import { getDailyInspiration } from './services/geminiService';
+import { getDailyInspiration } from './services/quoteService';
 import { Coordinates, PrayerApiResponse, InspirationContent, LocationResult } from './types';
 
 const App: React.FC = () => {
@@ -257,7 +257,7 @@ const App: React.FC = () => {
               )}
            </section>
 
-           {/* Gemini Inspiration Section */}
+           {/* Inspiration Section (Local Data) */}
            <section className="w-full max-w-3xl mx-auto">
              <InspirationCard content={inspiration} loading={loadingInspiration} />
            </section>
@@ -265,7 +265,7 @@ const App: React.FC = () => {
         </main>
 
         <footer className="mt-12 text-center text-slate-600 text-sm py-4 border-t border-white/5">
-          <p>&copy; {new Date().getFullYear()} Nurul Waqt. Ditenagai oleh Aladhan API & Google Gemini.</p>
+          <p>&copy; {new Date().getFullYear()} Nurul Waqt. Ditenagai oleh Aladhan API.</p>
         </footer>
       </div>
     </div>
