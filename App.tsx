@@ -101,11 +101,15 @@ const App: React.FC = () => {
       setNextPrayer(next);
 
       // --- ADHAN LOGIC ---
-      const currentTimeStr = now.toLocaleTimeString('id-ID', { 
-        hour: '2-digit', 
-        minute: '2-digit', 
-        hour12: false 
-      }).replace('.', ':'); // Ensure format HH:mm matches API
+      // Gunakan format manual agar konsisten (HH:mm) di semua browser/device
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const currentTimeStr = `${hours}:${minutes}`;
+
+      // Debug log setiap menit ke-0 detik untuk memastikan waktu sesuai
+      if (now.getSeconds() === 0) {
+         console.log(`[Timer] Current: ${currentTimeStr}, Checking against prayers...`);
+      }
 
       // Check if current time matches any prayer time
       Object.entries(prayerData.data.timings).forEach(([name, time]) => {
