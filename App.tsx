@@ -19,6 +19,7 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [loadingInspiration, setLoadingInspiration] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [showAudioHint, setShowAudioHint] = useState<boolean>(false);
   
   // Audio State
   const [isMuted, setIsMuted] = useState<boolean>(true); // Default muted to comply with browser autoplay policies
@@ -34,6 +35,7 @@ const App: React.FC = () => {
 
   // Fallback to Monas, Jakarta if geolocation fails
   const DEFAULT_COORDS = { latitude: -6.1751, longitude: 106.8650, locationName: "Jakarta Pusat" };
+  const STORAGE_KEY = 'waqt_location';
 
   const fetchInspiration = useCallback(async (prayerName: string) => {
     setLoadingInspiration(true);
@@ -63,8 +65,23 @@ const App: React.FC = () => {
     setLoading(false);
   }, [fetchInspiration]);
 
-  // Initial Load
+  // Initial Load with LocalStorage Check
   useEffect(() => {
+    // 1. Cek LocalStorage dulu
+    const savedLocation = localStorage.getItem(STORAGE_KEY);
+    if (savedLocation) {
+      try {
+        const parsedCoords = JSON.parse(savedLocation);
+        setCoords(parsedCoords);
+        fetchData(parsedCoords);
+        return; // Stop di sini kalau ada data tersimpan
+      } catch (e) {
+        console.error("Gagal parse lokasi tersimpan:", e);
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    }
+
+    // 2. Kalau tidak ada, baru coba Geolocation
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -72,6 +89,7 @@ const App: React.FC = () => {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
           };
+          // Jangan simpan ke localStorage otomatis biar user punya opsi 'pulang' ke lokasi asli saat clear cache/reset
           setCoords(currentCoords);
           fetchData(currentCoords);
         },
@@ -148,6 +166,14 @@ const App: React.FC = () => {
     return () => clearInterval(interval);
   }, [prayerData, isMuted]);
 
+  // Hint Timer
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowAudioHint(true);
+    }, 3000); // Show hint after 3 seconds
+    return () => clearTimeout(timer);
+  }, []);
+
   // Audio Event Listeners
   useEffect(() => {
     const audio = audioRef.current;
@@ -160,6 +186,7 @@ const App: React.FC = () => {
 
   const toggleMute = () => {
     setIsMuted(!isMuted);
+    setShowAudioHint(false);
     // If we unmute and something should be playing, logic above will catch it in next second tick if time still matches,
     // or user simply enables it for future adhans.
     if (audioRef.current) {
@@ -188,6 +215,10 @@ const App: React.FC = () => {
       longitude: parseFloat(result.lon),
       locationName: result.display_name.split(',')[0]
     };
+    
+    // Simpan ke LocalStorage agar persisten
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(newCoords));
+    
     setCoords(newCoords);
     fetchData(newCoords);
     setIsSearchOpen(false);
@@ -366,6 +397,29 @@ const App: React.FC = () => {
         <footer className="mt-12 text-center text-slate-600 text-sm py-4 border-t border-white/5">
           <p>&copy; {new Date().getFullYear()} Made with ❤️ by <a href="https://ryansutrisno.com" className="text-sky-400 hover:underline" target="_blank" rel="noopener noreferrer">Ryan Sutrisno</a></p>
         </footer>
+
+        {/* Audio Hint Toast */}
+        {showAudioHint && isMuted && (
+          <div className="fixed bottom-6 left-4 right-4 md:left-auto md:right-6 z-50 animate-in fade-in slide-in-from-bottom-8 duration-700 flex justify-center md:block">
+             <div className="bg-slate-800/90 backdrop-blur border border-sky-500/30 text-sky-100 p-4 rounded-2xl shadow-2xl shadow-sky-500/10 flex items-start gap-4 w-full max-w-sm">
+                <div className="bg-sky-500/20 p-2.5 rounded-full text-sky-400 shrink-0">
+                   <Volume2 className="w-6 h-6" />
+                </div>
+                <div className="flex-1">
+                   <h4 className="font-semibold text-white mb-1">Aktifkan Suara Adzan?</h4>
+                   <p className="text-sm text-slate-300 leading-relaxed">
+                     Klik tombol audio untuk mengaktifkan suara Adzan otomatis.
+                   </p>
+                </div>
+                <button 
+                  onClick={() => setShowAudioHint(false)}
+                  className="text-slate-500 hover:text-white transition-colors -mr-1 -mt-1"
+                >
+                   <X className="w-5 h-5" />
+                </button>
+             </div>
+          </div>
+        )}
       </div>
     </div>
   );
