@@ -4,7 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nurul Waqt - Jadwal Sholat</title>
+    
+    <!-- Script untuk menyembunyikan warning Tailwind CDN di console saat production -->
+    <script>
+      (function() {
+        var originalWarn = console.warn;
+        console.warn = function(...args) {
+          if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) {
+            return;
+          }
+          originalWarn.apply(console, args);
+        };
+      })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -57,5 +71,6 @@
 </head>
   <body>
     <div id="root"></div>
+    <script type="module" src="./index.tsx"></script>
   </body>
 </html>
