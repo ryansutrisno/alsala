@@ -132,7 +132,7 @@ const App: React.FC = () => {
                 <Navigation className="w-6 h-6 text-white" />
              </div>
              <div>
-               <h1 className="text-xl font-bold tracking-tight text-white">Nurul Waqt</h1>
+               <h1 className="text-xl font-bold tracking-tight text-white">Alsala</h1>
                <p className="text-xs text-sky-200/60 font-medium tracking-wider">JADWAL SHOLAT DIGITAL</p>
              </div>
           </div>
