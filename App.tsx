@@ -364,7 +364,7 @@ const App: React.FC = () => {
         </main>
 
         <footer className="mt-12 text-center text-slate-600 text-sm py-4 border-t border-white/5">
-          <p>&copy; {new Date().getFullYear()} Made with ❤️ by <a href="https://ryansutrisno.com" target="_blank" rel="noopener noreferrer">Ryan Sutrisno</a></p>
+          <p>&copy; {new Date().getFullYear()} Made with ❤️ by <a href="https://ryansutrisno.com" className="text-sky-400 hover:underline" target="_blank" rel="noopener noreferrer">Ryan Sutrisno</a></p>
         </footer>
       </div>
     </div>
