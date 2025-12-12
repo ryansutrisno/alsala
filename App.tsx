@@ -394,58 +394,71 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* Main Content Area - Scrollable internally if needed, but tries to fit */}
-        <main className="flex-grow flex flex-col justify-center gap-4 md:gap-8 overflow-y-auto custom-scrollbar px-2">
+        {/* Main Content Area - Grid Layout for Landscape Efficiency */}
+        <main className="flex-grow grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 overflow-y-auto custom-scrollbar px-2 content-center">
            
-           {/* Clock & Next Prayer Status */}
-           <div className="flex flex-col items-center justify-center py-2 shrink-0">
-              <Clock />
-              
-              {nextPrayer && (
-                <div className="mt-6 text-center animate-fade-in-up">
-                   <p className="text-slate-400 text-sm uppercase tracking-widest mb-2">Menuju Waktu</p>
-                   <div className="inline-flex items-center gap-3 bg-white/5 border border-white/10 px-6 py-2 rounded-full backdrop-blur-sm">
-                      <span className="text-2xl font-bold text-sky-400">{nextPrayer.name}</span>
-                      <span className="w-px h-6 bg-white/10"></span>
-                      <span className="text-xl font-mono text-white">{nextPrayer.time}</span>
-                   </div>
-                   <p className="text-xs text-gray-500 mt-2">
-                     {Math.floor(nextPrayer.diffMs / 3600000)}j {Math.floor((nextPrayer.diffMs % 3600000) / 60000)}m lagi
-                   </p>
-                </div>
-              )}
+           {/* Left Column: Clock & Inspiration (On Desktop) */}
+           <div className="lg:col-span-4 flex flex-col justify-center gap-4">
+              {/* Clock & Next Prayer Status */}
+              <div className="flex flex-col items-center justify-center py-2 shrink-0">
+                  <Clock />
+                  
+                  {nextPrayer && (
+                    <div className="mt-4 lg:mt-6 text-center animate-fade-in-up">
+                      <p className="text-slate-400 text-xs uppercase tracking-widest mb-1">Menuju Waktu</p>
+                      <div className="inline-flex items-center gap-3 bg-white/5 border border-white/10 px-5 py-1.5 rounded-full backdrop-blur-sm">
+                          <span className="text-xl font-bold text-sky-400">{nextPrayer.name}</span>
+                          <span className="w-px h-5 bg-white/10"></span>
+                          <span className="text-lg font-mono text-white">{nextPrayer.time}</span>
+                      </div>
+                      <p className="text-[10px] text-gray-500 mt-1">
+                        {Math.floor(nextPrayer.diffMs / 3600000)}j {Math.floor((nextPrayer.diffMs % 3600000) / 60000)}m lagi
+                      </p>
+                    </div>
+                  )}
+              </div>
+
+               {/* Inspiration Section (Moved here for better space usage on desktop) */}
+               <section className="w-full max-w-md mx-auto hidden lg:block">
+                 <InspirationCard content={inspiration} loading={loadingInspiration} />
+               </section>
            </div>
 
-           {/* Prayer Cards Grid - Compact Gap */}
-           <section className="w-full max-w-6xl mx-auto shrink-0">
-              {loading ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                  {[...Array(6)].map((_, i) => (
-                    <div key={i} className="h-32 bg-white/5 rounded-2xl animate-pulse"></div>
-                  ))}
-                </div>
-              ) : prayerData ? (
-                 <PrayerList 
-                    timings={prayerData.data.timings} 
-                    nextPrayer={nextPrayer?.name || ''} 
-                 />
-              ) : (
-                <div className="text-center p-10 bg-red-500/10 rounded-xl border border-red-500/20">
-                   <p className="text-red-400">{error || "Data tidak tersedia."}</p>
-                   <button 
-                      onClick={() => coords && fetchData(coords)}
-                      className="mt-4 flex items-center justify-center gap-2 mx-auto px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-200 rounded-lg transition-colors"
-                   >
-                      <RefreshCw className="w-4 h-4" /> Coba Lagi
-                   </button>
-                </div>
-              )}
-           </section>
-
-           {/* Inspiration Section (Local Data) */}
-           <section className="w-full max-w-3xl mx-auto shrink-0 pb-4">
-             <InspirationCard content={inspiration} loading={loadingInspiration} />
-           </section>
+           {/* Right Column: Prayer Cards Grid */}
+           <div className="lg:col-span-8 flex flex-col justify-center">
+             <section className="w-full">
+                {loading ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 lg:gap-4">
+                    {[...Array(6)].map((_, i) => (
+                      <div key={i} className="h-24 lg:h-32 bg-white/5 rounded-2xl animate-pulse"></div>
+                    ))}
+                  </div>
+                ) : prayerData ? (
+                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 lg:gap-4">
+                      {/* Pass custom class to PrayerList to control grid internally if needed, or wrap it */}
+                      <PrayerList 
+                          timings={prayerData.data.timings} 
+                          nextPrayer={nextPrayer?.name || ''} 
+                       />
+                   </div>
+                ) : (
+                  <div className="text-center p-10 bg-red-500/10 rounded-xl border border-red-500/20">
+                     <p className="text-red-400">{error || "Data tidak tersedia."}</p>
+                     <button 
+                        onClick={() => coords && fetchData(coords)}
+                        className="mt-4 flex items-center justify-center gap-2 mx-auto px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-200 rounded-lg transition-colors"
+                     >
+                        <RefreshCw className="w-4 h-4" /> Coba Lagi
+                     </button>
+                  </div>
+                )}
+             </section>
+             
+             {/* Inspiration Section (Mobile Only) */}
+             <section className="w-full max-w-md mx-auto lg:hidden mt-4">
+               <InspirationCard content={inspiration} loading={loadingInspiration} />
+             </section>
+           </div>
 
         </main>
 

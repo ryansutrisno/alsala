@@ -18,7 +18,8 @@ const PrayerList: React.FC<PrayerListProps> = ({ timings, nextPrayer }) => {
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 w-full">
+    // Grid configuration is now handled by the parent container or flexible here
+    <div className="contents"> 
       {prayers.map((prayer) => {
         const isActive = prayer.key === nextPrayer;
         return (
