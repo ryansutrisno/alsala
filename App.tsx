@@ -8,8 +8,8 @@ import { getDailyInspiration } from './services/quoteService';
 import { Coordinates, PrayerApiResponse, InspirationContent, LocationResult } from './types';
 
 // Audio Sources
-const ADHAN_FAJR_URL = 'https://download.tvquran.com/download/Adhan/Madina/Adhan_Fajr_Madina.mp3';
-const ADHAN_GENERAL_URL = 'https://download.tvquran.com/download/Adhan/Madina/Adhan_Madina.mp3';
+const ADHAN_FAJR_URL = '/Adzan_Subuh_Merdu.mp3';
+const ADHAN_GENERAL_URL = '/Adzan_Mekkah_Versi_Full.mp3';
 
 const App: React.FC = () => {
   const [coords, setCoords] = useState<Coordinates | null>(null);
@@ -146,15 +146,27 @@ const App: React.FC = () => {
              console.log(`Triggering Adhan for ${name}`);
              
              // Select Audio Source
-             if (name === 'Fajr') {
-               audioRef.current.src = ADHAN_FAJR_URL;
-             } else {
-               audioRef.current.src = ADHAN_GENERAL_URL;
+             const audioSrc = name === 'Fajr' ? ADHAN_FAJR_URL : ADHAN_GENERAL_URL;
+             
+             // Cek apakah source berubah sebelum set
+             if (audioRef.current.src !== audioSrc) {
+                audioRef.current.src = audioSrc;
+                audioRef.current.load(); // Wajib load ulang saat ganti src
              }
 
-             audioRef.current.play()
-               .then(() => setIsPlaying(true))
-               .catch(e => console.error("Autoplay prevented:", e));
+             const playPromise = audioRef.current.play();
+
+             if (playPromise !== undefined) {
+               playPromise
+                 .then(() => {
+                    setIsPlaying(true);
+                    console.log(`Adhan playing: ${name}`);
+                 })
+                 .catch(error => {
+                    console.error("Audio playback failed:", error);
+                    // Fallback log atau UI feedback jika perlu
+                 });
+             }
              
              lastPlayedRef.current = `${name}-${cleanTime}`;
           }
