@@ -282,7 +282,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f172a] relative overflow-x-hidden selection:bg-sky-500/30">
+    <div className="h-screen w-screen bg-[#0f172a] relative overflow-hidden selection:bg-sky-500/30 flex flex-col">
       {/* Audio Element */}
       <audio ref={audioRef} className="hidden" />
       
@@ -293,10 +293,10 @@ const App: React.FC = () => {
          <div className="absolute top-[40%] -right-[10%] w-[40%] h-[40%] bg-purple-600/10 rounded-full blur-[120px]" />
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-8 min-h-screen flex flex-col">
+      <div className="relative z-10 container mx-auto px-4 py-4 h-full flex flex-col max-h-screen">
         
-        {/* Header Section */}
-        <header className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+        {/* Header Section - Compact padding */}
+        <header className="flex flex-col md:flex-row justify-between items-center mb-4 gap-4 shrink-0">
           <div className="flex items-center gap-3 w-full md:w-auto">
              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center shadow-lg shadow-sky-500/20 shrink-0">
                 <Navigation className="w-6 h-6 text-white" />
@@ -394,11 +394,11 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* Main Content Area */}
-        <main className="flex-grow flex flex-col gap-8 md:gap-12">
+        {/* Main Content Area - Scrollable internally if needed, but tries to fit */}
+        <main className="flex-grow flex flex-col justify-center gap-4 md:gap-8 overflow-y-auto custom-scrollbar px-2">
            
            {/* Clock & Next Prayer Status */}
-           <div className="flex flex-col items-center justify-center py-4">
+           <div className="flex flex-col items-center justify-center py-2 shrink-0">
               <Clock />
               
               {nextPrayer && (
@@ -416,8 +416,8 @@ const App: React.FC = () => {
               )}
            </div>
 
-           {/* Prayer Cards Grid */}
-           <section className="w-full max-w-6xl mx-auto">
+           {/* Prayer Cards Grid - Compact Gap */}
+           <section className="w-full max-w-6xl mx-auto shrink-0">
               {loading ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                   {[...Array(6)].map((_, i) => (
@@ -443,13 +443,13 @@ const App: React.FC = () => {
            </section>
 
            {/* Inspiration Section (Local Data) */}
-           <section className="w-full max-w-3xl mx-auto">
+           <section className="w-full max-w-3xl mx-auto shrink-0 pb-4">
              <InspirationCard content={inspiration} loading={loadingInspiration} />
            </section>
 
         </main>
 
-        <footer className="mt-12 text-center text-slate-600 text-sm py-4 border-t border-white/5">
+        <footer className="mt-2 text-center text-slate-600 text-xs py-2 border-t border-white/5 shrink-0">
           <p>&copy; {new Date().getFullYear()} Made with ❤️ by <a href="https://ryansutrisno.com" className="text-sky-400 hover:underline" target="_blank" rel="noopener noreferrer">Ryan Sutrisno</a></p>
         </footer>
 
