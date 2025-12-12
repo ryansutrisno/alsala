@@ -20,6 +20,7 @@ const App: React.FC = () => {
   const [loadingInspiration, setLoadingInspiration] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [showAudioHint, setShowAudioHint] = useState<boolean>(false);
+  const [userInteracted, setUserInteracted] = useState<boolean>(false); // Track user interaction
   
   // Audio State
   const [isMuted, setIsMuted] = useState<boolean>(true); // Default muted to comply with browser autoplay policies
@@ -180,11 +181,37 @@ const App: React.FC = () => {
 
   // Hint Timer
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowAudioHint(true);
-    }, 3000); // Show hint after 3 seconds
-    return () => clearTimeout(timer);
-  }, []);
+    // Show hint if user hasn't interacted yet
+    if (!userInteracted) {
+      const timer = setTimeout(() => {
+        setShowAudioHint(true);
+      }, 3000); 
+      return () => clearTimeout(timer);
+    }
+  }, [userInteracted]);
+
+  // Handle first user interaction to unlock audio
+  useEffect(() => {
+    const handleInteraction = () => {
+      if (!userInteracted) {
+        setUserInteracted(true);
+        // Silent play to unlock audio context
+        if (audioRef.current) {
+          audioRef.current.play().then(() => {
+            audioRef.current?.pause();
+            audioRef.current!.currentTime = 0;
+          }).catch(() => {}); // Ignore error on silent unlock
+        }
+      }
+    };
+
+    window.addEventListener('click', handleInteraction);
+    window.addEventListener('keydown', handleInteraction);
+    return () => {
+      window.removeEventListener('click', handleInteraction);
+      window.removeEventListener('keydown', handleInteraction);
+    };
+  }, [userInteracted]);
 
   // Audio Event Listeners
   useEffect(() => {
@@ -199,10 +226,14 @@ const App: React.FC = () => {
   const toggleMute = () => {
     setIsMuted(!isMuted);
     setShowAudioHint(false);
-    // If we unmute and something should be playing, logic above will catch it in next second tick if time still matches,
-    // or user simply enables it for future adhans.
+    
+    // Explicitly try to play/pause to ensure browser knows user intended to use audio
     if (audioRef.current) {
-      if (!isMuted) {
+      if (isMuted) {
+        // Unmuting: Prepare audio (load)
+        audioRef.current.load();
+      } else {
+        // Muting
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
         setIsPlaying(false);

@@ -16,7 +16,7 @@ const InspirationCard: React.FC<InspirationCardProps> = ({ content, loading }) =
       
       <div className="flex items-center gap-2 mb-4 text-purple-300">
         <Sparkles className="w-5 h-5" />
-        <span className="text-sm font-semibold uppercase tracking-wider">Inspirasi Harian (AI)</span>
+        <span className="text-sm font-semibold uppercase tracking-wider">Inspirasi Harian</span>
       </div>
 
       {loading ? (
