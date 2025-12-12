@@ -131,48 +131,52 @@ const App: React.FC = () => {
       }
 
       // Check if current time matches any prayer time
-      Object.entries(prayerData.data.timings).forEach(([name, time]) => {
-        // Clean time string from API (sometimes it has timezone info like "04:30 (WIB)")
-        const cleanTime = (time as string).split(' ')[0];  
-
-        if (cleanTime === currentTimeStr) {
-          // Prevent re-triggering if already played for this time
-          if (lastPlayedRef.current === `${name}-${cleanTime}`) return;
-
-          // SKIP IMSAK
-          if (name === 'Imsak' || name === 'Sunrise' || name === 'Sunset') return;
-
-          // Trigger Adhan
-          if (!isMuted && audioRef.current) {
-             console.log(`Triggering Adhan for ${name}`);
-             
-             // Select Audio Source
-             const audioSrc = name === 'Fajr' ? ADHAN_FAJR_URL : ADHAN_GENERAL_URL;
-             
-             // Cek apakah source berubah sebelum set
-             if (audioRef.current.src !== audioSrc) {
-                audioRef.current.src = audioSrc;
-                audioRef.current.load(); // Wajib load ulang saat ganti src
-             }
-
-             const playPromise = audioRef.current.play();
-
-             if (playPromise !== undefined) {
-               playPromise
-                 .then(() => {
-                    setIsPlaying(true);
-                    console.log(`Adhan playing: ${name}`);
-                 })
-                 .catch(error => {
-                    console.error("Audio playback failed:", error);
-                    // Fallback log atau UI feedback jika perlu
-                 });
-             }
-             
-             lastPlayedRef.current = `${name}-${cleanTime}`;
+      // PENTING: Cek detik == 0 agar trigger hanya SEKALI di awal menit
+      // Jika tidak dicek detiknya, kode ini akan jalan 60x dalam 1 menit, berisiko race condition
+      if (now.getSeconds() === 0) {
+        Object.entries(prayerData.data.timings).forEach(([name, time]) => {
+          // Clean time string from API (sometimes it has timezone info like "04:30 (WIB)")
+          const cleanTime = (time as string).split(' ')[0];  
+  
+          if (cleanTime === currentTimeStr) {
+            // Prevent re-triggering if already played for this time
+            if (lastPlayedRef.current === `${name}-${cleanTime}`) return;
+  
+            // SKIP IMSAK
+            if (name === 'Imsak' || name === 'Sunrise' || name === 'Sunset') return;
+  
+            // Trigger Adhan
+            if (!isMuted && audioRef.current) {
+               console.log(`Triggering Adhan for ${name}`);
+               
+               // Select Audio Source
+               const audioSrc = name === 'Fajr' ? ADHAN_FAJR_URL : ADHAN_GENERAL_URL;
+               
+               // Cek apakah source berubah sebelum set
+               if (audioRef.current.src !== audioSrc && !audioRef.current.src.endsWith(audioSrc)) {
+                  audioRef.current.src = audioSrc;
+                  audioRef.current.load(); // Wajib load ulang saat ganti src
+               }
+  
+               const playPromise = audioRef.current.play();
+  
+               if (playPromise !== undefined) {
+                 playPromise
+                   .then(() => {
+                      setIsPlaying(true);
+                      console.log(`Adhan playing: ${name}`);
+                   })
+                   .catch(error => {
+                      console.error("Audio playback failed:", error);
+                      // Fallback log atau UI feedback jika perlu
+                   });
+               }
+               
+               lastPlayedRef.current = `${name}-${cleanTime}`;
+            }
           }
-        }
-      });
+        });
+      }
 
     }, 1000); // Check every second for precision
 
