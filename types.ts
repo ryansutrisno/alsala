@@ -57,5 +57,5 @@ export interface LocationResult {
 export interface InspirationContent {
   quote: string;
   source: string;
-  reflection: string;
+  reflection?: string; // Made optional as external API doesn't provide it
 }

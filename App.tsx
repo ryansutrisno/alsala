@@ -213,6 +213,18 @@ const App: React.FC = () => {
     };
   }, [userInteracted]);
 
+  // Inspiration Auto-Refresh Timer (30 minutes)
+  useEffect(() => {
+    // Initial fetch handled by fetchData -> fetchInspiration
+    
+    const interval = setInterval(() => {
+       // Pass "General" or current prayer context if needed, though API is random
+       fetchInspiration("General"); 
+    }, 30 * 60 * 1000); // 30 minutes
+
+    return () => clearInterval(interval);
+  }, [fetchInspiration]);
+
   // Audio Event Listeners
   useEffect(() => {
     const audio = audioRef.current;
