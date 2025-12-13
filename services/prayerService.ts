@@ -1,20 +1,88 @@
 import { PrayerApiResponse, Coordinates, LocationResult } from '../types';
+import { db } from './db';
 
 export const getPrayerTimes = async (coords: Coordinates): Promise<PrayerApiResponse | null> => {
   try {
     const date = new Date();
-    // Method 2 (ISNA) is generally safe, but for Indonesia, Ministry of Religious Affairs (Kemenag) is ideal. 
-    // Aladhan doesn't strictly have Kemenag ID easily exposed without specific method params, 
-    // but ISNA or Muslim World League is a good default fallback.
-    // Adding school=1 for Shafi'i (standard in Indonesia) might be relevant for Asr calculation in some methods.
-    const url = `https://api.aladhan.com/v1/timings/${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}?latitude=${coords.latitude}&longitude=${coords.longitude}&method=20`; // Method 20 is Kemenag (Indonesia)
-    
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error('Failed to fetch prayer times');
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+
+    // Cache Key: waqt_cache_YYYY_M_LAT_LON
+    const lat = coords.latitude.toFixed(2);
+    const lon = coords.longitude.toFixed(2);
+    const cacheId = `waqt_prayer_cache_${year}_${month}_${lat}_${lon}`;
+
+    let monthData: any[] = [];
+
+    // 1. Cek Cache IndexedDB (Dexie)
+    try {
+      const cached = await db.prayerCache.get(cacheId);
+      if (cached) {
+        monthData = cached.data;
+        // console.log("Using cached prayer data from IndexedDB");
+      }
+    } catch (e) {
+      console.warn("IndexedDB read error", e);
     }
-    const data: PrayerApiResponse = await response.json();
-    return data;
+
+    // 2. Jika Cache Kosong, Fetch dari API Calendar (Bulanan)
+    if (!monthData || monthData.length === 0) {
+      // Method 20 is Kemenag (Indonesia)
+      const url = `https://api.aladhan.com/v1/calendar/${year}/${month}?latitude=${coords.latitude}&longitude=${coords.longitude}&method=20`;
+      
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Failed to fetch prayer times');
+      }
+      const json = await response.json();
+      
+      if (json.code === 200 && Array.isArray(json.data)) {
+        monthData = json.data;
+        // Simpan ke IndexedDB
+        try {
+          // Bersihkan cache bulan lalu agar db tidak bengkak (opsional, tapi baik untuk maintenance)
+          // Kita bisa hapus data yang bukan bulan ini
+          const prevMonth = month === 1 ? 12 : month - 1;
+          const prevYear = month === 1 ? year - 1 : year;
+          const prevCacheId = `waqt_prayer_cache_${prevYear}_${prevMonth}_${lat}_${lon}`;
+          await db.prayerCache.delete(prevCacheId);
+
+          await db.prayerCache.put({
+            id: cacheId,
+            year,
+            month,
+            latitude: lat,
+            longitude: lon,
+            data: monthData,
+            timestamp: Date.now()
+          });
+        } catch (e) {
+          console.warn("IndexedDB write error", e);
+        }
+      }
+    }
+
+    // 3. Ambil data hari ini dari array bulanan
+    // API Aladhan mengembalikan array object per hari. Kita cari yang tanggalnya cocok.
+    const todayData = monthData.find((d: any) => {
+      // d.date.gregorian.day bisa "01" atau "1", jadi parse int agar aman saat dibandingkan dengan variable day (number)
+      return parseInt(d.date.gregorian.day, 10) === day;
+    });
+
+    if (todayData) {
+      // Return dalam format PrayerApiResponse (Single Day)
+      // Karena struktur item di array 'data' calendar SAMA PERSIS dengan 'data' di endpoint timings harian,
+      // kita bisa langsung bungkus.
+      return {
+        code: 200,
+        status: "OK",
+        data: todayData
+      } as PrayerApiResponse;
+    }
+
+    return null;
+
   } catch (error) {
     console.error("Error fetching prayer times:", error);
     return null;

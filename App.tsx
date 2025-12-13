@@ -134,6 +134,17 @@ const App: React.FC = () => {
       // PENTING: Cek detik == 0 agar trigger hanya SEKALI di awal menit
       // Jika tidak dicek detiknya, kode ini akan jalan 60x dalam 1 menit, berisiko race condition
       if (now.getSeconds() === 0) {
+        
+        // --- AUTO REFRESH DATA MIDNIGHT ---
+        // Jika sudah jam 00:00, refresh data untuk hari baru
+        // Service akan otomatis cek cache: 
+        // - Kalau masih bulan yang sama -> Ambil dari cache (Instant)
+        // - Kalau ganti bulan -> Fetch API baru
+        if (hours === '00' && minutes === '00' && coords) {
+           console.log("[System] New Day Detected. Refreshing prayer data...");
+           fetchData(coords);
+        }
+
         Object.entries(prayerData.data.timings).forEach(([name, time]) => {
           // Clean time string from API (sometimes it has timezone info like "04:30 (WIB)")
           const cleanTime = (time as string).split(' ')[0];  
