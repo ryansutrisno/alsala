@@ -116,8 +116,11 @@ export const getNextPrayer = (timings: any): { name: string; time: string; diffM
   let found = false;
 
   for (const name of prayerNames) {
-    const timeStr = timings[name];
+    let timeStr = timings[name];
     if (!timeStr) continue;
+
+    // Clean time string: remove timezone suffix like " (WIB)" or " (UTC)"
+    timeStr = timeStr.split(' ')[0];
 
     const [hours, minutes] = timeStr.split(':').map(Number);
     const prayerDate = new Date();
@@ -140,14 +143,18 @@ export const getNextPrayer = (timings: any): { name: string; time: string; diffM
 
   // If all prayers for today passed, next is Imsak tomorrow
   if (!found) {
-    const timeStr = timings['Imsak']; // Loop back to Imsak
-    const [hours, minutes] = timeStr.split(':').map(Number);
+    let timeStr = timings['Imsak']; // Loop back to Imsak
+    
+    // Clean time string here too
+    const cleanTimeStr = timeStr.split(' ')[0];
+    const [hours, minutes] = cleanTimeStr.split(':').map(Number);
+    
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(hours, minutes, 0, 0);
     
     nextPrayerName = 'Imsak';
-    nextPrayerTime = timeStr;
+    nextPrayerTime = timeStr; // Keep original format for display if preferred, or use cleanTimeStr
     minDiff = tomorrow.getTime() - now.getTime();
   }
 
