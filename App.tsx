@@ -153,8 +153,10 @@ const App: React.FC = () => {
             // Prevent re-triggering if already played for this time
             if (lastPlayedRef.current === `${name}-${cleanTime}`) return;
   
-            // SKIP IMSAK
-            if (name === 'Imsak' || name === 'Sunrise' || name === 'Sunset') return;
+            // SKIP Non-Obligatory Prayers (Imsak, Sunrise, Sunset, Midnight, etc.)
+            // Kita hanya ingin Adzan bunyi di 5 waktu wajib
+            const allowedPrayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+            if (!allowedPrayers.includes(name)) return;
   
             // Trigger Adhan
             if (!isMuted && audioRef.current) {
