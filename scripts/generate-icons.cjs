@@ -4,7 +4,7 @@ const path = require('path');
 
 // Go up one level from scripts/ to project root
 const projectRoot = path.join(__dirname, '..');
-const inputImage = path.join(projectRoot, 'public', 'alsala-image.png');
+const inputImage = path.join(projectRoot, 'public', 'alsala-icon.png');
 const outputDir = path.join(projectRoot, 'public');
 
 // Icon sizes needed for PWA
@@ -23,7 +23,7 @@ async function generateIcons() {
   try {
     // Check if input image exists
     if (!fs.existsSync(inputImage)) {
-      console.error('Error: alsala-image.png not found in public folder');
+      console.error('Error: alsala-icon.png not found in public folder');
       process.exit(1);
     }
 
