@@ -34,10 +34,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/username/alsala.git"
+    "url": "https://github.com/ryansutrisno/alsala.git"
   },
   "bugs": {
-    "url": "https://github.com/username/alsala/issues"
+    "url": "https://github.com/ryansutrisno/alsala/issues"
   },
   "homepage": "https://alsala.netlify.app"
 }
