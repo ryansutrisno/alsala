@@ -2,6 +2,12 @@
 
 Semua perubahan yang signifikan pada proyek ini akan didokumentasikan dalam file ini.
 
+## [2.0.1](https://github.com/ryansutrisno/alsala/compare/v2.0.0...v2.0.1) (2026-03-07)
+
+### 🐛 Bug Fixes
+
+* **pwa:** regenerate icons using correct logo source ([6d56b7b](https://github.com/ryansutrisno/alsala/commit/6d56b7be952fd233a91b10cf3da3fdd0b259d5e1))
+
 ## [2.0.0](https://github.com/ryansutrisno/alsala/compare/v1.0.0...v2.0.0) (2026-03-07)
 
 ### ⚠ BREAKING CHANGES
