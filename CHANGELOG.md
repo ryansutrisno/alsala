@@ -2,6 +2,18 @@
 
 Semua perubahan yang signifikan pada proyek ini akan didokumentasikan dalam file ini.
 
+## [2.0.0](https://github.com/ryansutrisno/alsala/compare/v1.0.0...v2.0.0) (2026-03-07)
+
+### ⚠ BREAKING CHANGES
+
+* None
+
+Closes: pwa-support, offline-functionality
+
+### ✨ Features
+
+* implement Progressive Web App (PWA) support ([fbb8b09](https://github.com/ryansutrisno/alsala/commit/fbb8b09a9d9ab72bf65dbbd0ddfc0ac46ffa0ed3))
+
 ## 1.0.0 (2026-03-07)
 
 ### ⚠ BREAKING CHANGES
