@@ -299,7 +299,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="h-screen w-screen bg-[#0f172a] relative overflow-hidden selection:bg-sky-500/30 flex flex-col">
+    <div className="min-h-screen w-full bg-[#0f172a] relative selection:bg-sky-500/30 flex flex-col overflow-x-hidden">
       {/* Audio Element */}
       <audio ref={audioRef} className="hidden" />
       
@@ -310,100 +310,101 @@ const App: React.FC = () => {
          <div className="absolute top-[40%] -right-[10%] w-[40%] h-[40%] bg-purple-600/10 rounded-full blur-[120px]" />
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-4 h-full flex flex-col max-h-screen">
+      <div className="relative z-10 container mx-auto px-3 sm:px-4 py-3 sm:py-4 min-h-screen flex flex-col">
         
-        {/* Header Section - Compact padding */}
-        <header className="flex flex-col md:flex-row justify-between items-center mb-4 gap-4 shrink-0">
-          <div className="flex items-center gap-3 w-full md:w-auto">
-             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center shadow-lg shadow-sky-500/20 shrink-0">
-                <Navigation className="w-6 h-6 text-white" />
-             </div>
-             <div>
-               <h1 className="text-xl font-bold tracking-tight text-white">Alsala</h1>
-               <p className="text-xs text-sky-200/60 font-medium tracking-wider">JADWAL SHOLAT DIGITAL</p>
-             </div>
-          </div>
+        {/* Header Section - Responsive padding */}
+        <header className="flex flex-col sm:flex-row justify-between items-center mb-3 sm:mb-4 gap-3 sm:gap-4 shrink-0">
+           <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center shadow-lg shadow-sky-500/20 shrink-0">
+                 <Navigation className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-lg sm:text-xl font-bold tracking-tight text-white">Alsala</h1>
+                <p className="text-[10px] sm:text-xs text-sky-200/60 font-medium tracking-wider">JADWAL SHOLAT DIGITAL</p>
+              </div>
+           </div>
 
-          <div className="flex flex-col md:flex-row items-end md:items-center gap-3 w-full md:w-auto">
-             {/* Volume Control */}
-             <button 
-                onClick={toggleMute}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                  isMuted 
-                    ? 'bg-red-500/20 text-red-300 hover:bg-red-500/30' 
-                    : 'bg-green-500/20 text-green-300 hover:bg-green-500/30'
-                } ${isPlaying ? 'animate-pulse ring-1 ring-green-400' : ''}`}
-             >
-                {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-                <span>{isMuted ? "Adzan Off" : isPlaying ? "Adzan Berkumandang" : "Adzan On"}</span>
-             </button>
+           <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              {/* Volume Control */}
+              <button 
+                 onClick={toggleMute}
+                 className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-medium transition-all ${
+                   isMuted 
+                     ? 'bg-red-500/20 text-red-300 hover:bg-red-500/30' 
+                     : 'bg-green-500/20 text-green-300 hover:bg-green-500/30'
+                 } ${isPlaying ? 'animate-pulse ring-1 ring-green-400' : ''}`}
+              >
+                 {isMuted ? <VolumeX className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+                 <span className="hidden xs:inline">{isMuted ? "Adzan Off" : isPlaying ? "Adzan Berkumandang" : "Adzan On"}</span>
+                 <span className="xs:hidden">{isMuted ? "Adzan Off" : "Adzan On"}</span>
+              </button>
 
-             <div className="text-right">
-                <button 
-                  onClick={() => setIsSearchOpen(true)}
-                  className="flex items-center gap-2 justify-end text-sky-300 text-sm mb-1 ml-auto hover:text-white transition-colors group cursor-pointer"
-                >
-                   <MapPin className="w-4 h-4 group-hover:animate-bounce" />
-                   <span className="truncate max-w-[200px]">
-                     {coords?.locationName || prayerData?.data.meta.timezone || "Cari Lokasi..."}
-                   </span>
-                   <span className="text-xs bg-white/10 px-1.5 py-0.5 rounded text-sky-200">Ubah</span>
-                </button>
-                <p className="text-xs text-gray-500 bg-white/5 py-1 px-3 rounded-full inline-block backdrop-blur-sm">
-                   {prayerData?.data.date.hijri.day} {prayerData?.data.date.hijri.month.en} {prayerData?.data.date.hijri.year}
-                </p>
-             </div>
-          </div>
+              <div className="text-center sm:text-right">
+                 <button 
+                   onClick={() => setIsSearchOpen(true)}
+                   className="flex items-center gap-1.5 sm:gap-2 justify-center sm:justify-end text-sky-300 text-xs sm:text-sm mb-0.5 sm:mb-1 hover:text-white transition-colors group cursor-pointer"
+                 >
+                    <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:animate-bounce" />
+                    <span className="truncate max-w-[150px] sm:max-w-[200px]">
+                      {coords?.locationName || prayerData?.data.meta.timezone || "Cari Lokasi..."}
+                    </span>
+                    <span className="text-[10px] bg-white/10 px-1 sm:px-1.5 py-0.5 rounded text-sky-200">Ubah</span>
+                 </button>
+                 <p className="text-[10px] sm:text-xs text-gray-500 bg-white/5 py-0.5 sm:py-1 px-2 sm:px-3 rounded-full inline-block backdrop-blur-sm">
+                    {prayerData?.data.date.hijri.day} {prayerData?.data.date.hijri.month.en} {prayerData?.data.date.hijri.year}
+                 </p>
+              </div>
+           </div>
         </header>
 
         {/* Search Modal */}
         {isSearchOpen && (
-          <div className="fixed inset-0 z-50 flex items-start md:items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-             <div className="bg-[#1e293b] border border-white/10 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden mt-10 md:mt-0">
-                <div className="p-4 border-b border-white/10 flex justify-between items-center">
-                   <h3 className="text-white font-semibold">Ganti Lokasi</h3>
-                   <button onClick={() => setIsSearchOpen(false)} className="text-gray-400 hover:text-white">
+          <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/80 backdrop-blur-sm p-3 sm:p-4 animate-in fade-in duration-200">
+             <div className="bg-[#1e293b] border border-white/10 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden mt-4 sm:mt-0 mx-auto">
+                <div className="p-3 sm:p-4 border-b border-white/10 flex justify-between items-center">
+                   <h3 className="text-white font-semibold text-sm sm:text-base">Ganti Lokasi</h3>
+                   <button onClick={() => setIsSearchOpen(false)} className="text-gray-400 hover:text-white p-1">
                       <X className="w-5 h-5" />
                    </button>
                 </div>
-                <div className="p-4">
+                <div className="p-3 sm:p-4">
                    <form onSubmit={handleSearch} className="relative">
                       <input 
                         type="text" 
                         placeholder="Cari kota (misal: Bandung, Tokyo)" 
-                        className="w-full bg-slate-950 text-white border border-white/10 rounded-lg py-3 pl-10 pr-4 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                        className="w-full bg-slate-950 text-white border border-white/10 rounded-lg py-2.5 sm:py-3 pl-9 sm:pl-10 pr-20 sm:pr-24 text-sm focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
                         value={searchQuery}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                         autoFocus
                       />
-                      <Search className="w-5 h-5 text-gray-500 absolute left-3 top-3.5" />
+                      <Search className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 absolute left-3 top-3 sm:top-3.5" />
                       <button 
                         type="submit" 
                         disabled={isSearching}
-                        className="absolute right-2 top-2 bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded-md text-sm transition-colors disabled:opacity-50"
+                        className="absolute right-2 top-2 bg-sky-600 hover:bg-sky-500 text-white px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md text-xs sm:text-sm transition-colors disabled:opacity-50"
                       >
                          {isSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : "Cari"}
                       </button>
                    </form>
 
-                   <div className="mt-4 max-h-[300px] overflow-y-auto space-y-2 custom-scrollbar">
+                   <div className="mt-3 sm:mt-4 max-h-[250px] sm:max-h-[300px] overflow-y-auto space-y-1.5 sm:space-y-2 custom-scrollbar">
                       {searchResults.length > 0 ? (
                         searchResults.map((result) => (
                           <button
                             key={result.place_id}
                             onClick={() => selectLocation(result)}
-                            className="w-full text-left p-3 rounded-lg hover:bg-white/5 flex items-center gap-3 transition-colors group"
+                            className="w-full text-left p-2.5 sm:p-3 rounded-lg hover:bg-white/5 flex items-center gap-2 sm:gap-3 transition-colors group"
                           >
-                             <div className="bg-white/5 p-2 rounded-full text-gray-400 group-hover:text-sky-400 group-hover:bg-sky-500/10">
-                                <MapPin className="w-4 h-4" />
+                             <div className="bg-white/5 p-1.5 sm:p-2 rounded-full text-gray-400 group-hover:text-sky-400 group-hover:bg-sky-500/10 shrink-0">
+                                <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                              </div>
-                             <span className="text-sm text-gray-300 group-hover:text-white truncate">
+                             <span className="text-xs sm:text-sm text-gray-300 group-hover:text-white truncate">
                                 {result.display_name}
                              </span>
                           </button>
                         ))
                       ) : (
-                        !isSearching && searchQuery && <p className="text-center text-gray-500 text-sm py-4">Tidak ada hasil ditemukan.</p>
+                        !isSearching && searchQuery && <p className="text-center text-gray-500 text-xs sm:text-sm py-4">Tidak ada hasil ditemukan.</p>
                       )}
                    </div>
                 </div>
@@ -411,96 +412,95 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* Main Content Area - Grid Layout for Landscape Efficiency */}
-        <main className="flex-grow grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 overflow-y-auto custom-scrollbar px-2 content-center">
+        {/* Main Content Area - Responsive Grid Layout */}
+        <main className="flex-grow grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 lg:gap-6 py-2 sm:py-4 content-start lg:content-center">
            
            {/* Left Column: Clock & Inspiration (On Desktop) */}
-           <div className="lg:col-span-4 flex flex-col justify-center gap-4">
+           <div className="lg:col-span-4 flex flex-col justify-start lg:justify-center gap-3 sm:gap-4">
               {/* Clock & Next Prayer Status */}
-              <div className="flex flex-col items-center justify-center py-2 shrink-0">
+              <div className="flex flex-col items-center justify-center py-2 sm:py-4 shrink-0">
                   <Clock />
                   
                   {nextPrayer && (
-                    <div className="mt-4 lg:mt-6 text-center animate-fade-in-up">
-                      <p className="text-slate-400 text-xs uppercase tracking-widest mb-1">Menuju Waktu</p>
-                      <div className="inline-flex items-center gap-3 bg-white/5 border border-white/10 px-5 py-1.5 rounded-full backdrop-blur-sm">
-                          <span className="text-xl font-bold text-sky-400">{nextPrayer.name}</span>
-                          <span className="w-px h-5 bg-white/10"></span>
-                          <span className="text-lg font-mono text-white">{nextPrayer.time}</span>
+                    <div className="mt-3 sm:mt-4 lg:mt-6 text-center animate-fade-in-up">
+                      <p className="text-slate-400 text-[10px] sm:text-xs uppercase tracking-widest mb-1">Menuju Waktu</p>
+                      <div className="inline-flex items-center gap-2 sm:gap-3 bg-white/5 border border-white/10 px-3 sm:px-5 py-1 sm:py-1.5 rounded-full backdrop-blur-sm">
+                          <span className="text-base sm:text-xl font-bold text-sky-400">{nextPrayer.name}</span>
+                          <span className="w-px h-4 sm:h-5 bg-white/10"></span>
+                          <span className="text-sm sm:text-lg font-mono text-white">{nextPrayer.time}</span>
                       </div>
-                      <p className="text-[10px] text-gray-500 mt-1">
+                      <p className="text-[9px] sm:text-[10px] text-gray-500 mt-1">
                         {Math.floor(nextPrayer.diffMs / 3600000)}j {Math.floor((nextPrayer.diffMs % 3600000) / 60000)}m lagi
                       </p>
                     </div>
                   )}
               </div>
 
-               {/* Inspiration Section (Moved here for better space usage on desktop) */}
+               {/* Inspiration Section (Desktop Only) */}
                <section className="w-full max-w-md mx-auto hidden lg:block">
                  <InspirationCard content={inspiration} loading={loadingInspiration} />
                </section>
            </div>
 
            {/* Right Column: Prayer Cards Grid */}
-           <div className="lg:col-span-8 flex flex-col justify-center">
+           <div className="lg:col-span-8 flex flex-col justify-start lg:justify-center">
              <section className="w-full">
                 {loading ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 lg:gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 lg:gap-4">
                     {[...Array(6)].map((_, i) => (
-                      <div key={i} className="h-24 lg:h-32 bg-white/5 rounded-2xl animate-pulse"></div>
+                      <div key={i} className="h-20 sm:h-24 lg:h-32 bg-white/5 rounded-2xl animate-pulse"></div>
                     ))}
                   </div>
                 ) : prayerData ? (
-                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 lg:gap-4">
-                      {/* Pass custom class to PrayerList to control grid internally if needed, or wrap it */}
+                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 lg:gap-4">
                       <PrayerList 
                           timings={prayerData.data.timings} 
                           nextPrayer={nextPrayer?.name || ''} 
                        />
                    </div>
                 ) : (
-                  <div className="text-center p-10 bg-red-500/10 rounded-xl border border-red-500/20">
-                     <p className="text-red-400">{error || "Data tidak tersedia."}</p>
-                     <button 
-                        onClick={() => coords && fetchData(coords)}
-                        className="mt-4 flex items-center justify-center gap-2 mx-auto px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-200 rounded-lg transition-colors"
-                     >
-                        <RefreshCw className="w-4 h-4" /> Coba Lagi
-                     </button>
-                  </div>
+                   <div className="text-center p-6 sm:p-10 bg-red-500/10 rounded-xl border border-red-500/20">
+                      <p className="text-red-400 text-sm">{error || "Data tidak tersedia."}</p>
+                      <button 
+                         onClick={() => coords && fetchData(coords)}
+                         className="mt-4 flex items-center justify-center gap-2 mx-auto px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-200 rounded-lg transition-colors"
+                      >
+                         <RefreshCw className="w-4 h-4" /> Coba Lagi
+                      </button>
+                   </div>
                 )}
              </section>
              
-             {/* Inspiration Section (Mobile Only) */}
-             <section className="w-full max-w-md mx-auto lg:hidden mt-4">
+             {/* Inspiration Section (Mobile/Tablet Only) */}
+             <section className="w-full max-w-md mx-auto lg:hidden mt-3 sm:mt-4">
                <InspirationCard content={inspiration} loading={loadingInspiration} />
              </section>
            </div>
 
         </main>
 
-        <footer className="mt-2 text-center text-slate-600 text-xs py-2 border-t border-white/5 shrink-0">
+        <footer className="mt-auto text-center text-slate-600 text-[10px] sm:text-xs py-2 sm:py-3 border-t border-white/5 shrink-0">
           <p>&copy; {new Date().getFullYear()} Made with ❤️ by <a href="https://ryansutrisno.com" className="text-sky-400 hover:underline" target="_blank" rel="noopener noreferrer">Ryan Sutrisno</a></p>
         </footer>
 
-        {/* Audio Hint Toast */}
+        {/* Audio Hint Toast - Responsive */}
         {showAudioHint && isMuted && (
-          <div className="fixed bottom-6 left-4 right-4 md:left-auto md:right-6 z-50 animate-in fade-in slide-in-from-bottom-8 duration-700 flex justify-center md:block">
-             <div className="bg-slate-800/90 backdrop-blur border border-sky-500/30 text-sky-100 p-4 rounded-2xl shadow-2xl shadow-sky-500/10 flex items-start gap-4 w-full max-w-sm">
-                <div className="bg-sky-500/20 p-2.5 rounded-full text-sky-400 shrink-0">
-                   <Volume2 className="w-6 h-6" />
+          <div className="fixed bottom-4 left-3 right-3 sm:left-auto sm:right-4 z-50 animate-in fade-in slide-in-from-bottom-8 duration-700 flex justify-center sm:block">
+             <div className="bg-slate-800/90 backdrop-blur border border-sky-500/30 text-sky-100 p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-2xl shadow-sky-500/10 flex items-start gap-3 sm:gap-4 w-full max-w-sm">
+                <div className="bg-sky-500/20 p-2 sm:p-2.5 rounded-full text-sky-400 shrink-0">
+                   <Volume2 className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <div className="flex-1">
-                   <h4 className="font-semibold text-white mb-1">Aktifkan Suara Adzan?</h4>
-                   <p className="text-sm text-slate-300 leading-relaxed">
-                     Klik tombol audio untuk mengaktifkan suara Adzan otomatis.
+                <div className="flex-1 min-w-0">
+                   <h4 className="font-semibold text-white mb-0.5 sm:mb-1 text-sm">Aktifkan Suara Adzan?</h4>
+                   <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                      Klik tombol audio untuk mengaktifkan suara Adzan otomatis.
                    </p>
                 </div>
                 <button 
                   onClick={() => setShowAudioHint(false)}
-                  className="text-slate-500 hover:text-white transition-colors -mr-1 -mt-1"
+                  className="text-slate-500 hover:text-white transition-colors -mr-1 -mt-1 p-1"
                 >
-                   <X className="w-5 h-5" />
+                   <X className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
              </div>
           </div>

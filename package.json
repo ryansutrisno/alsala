@@ -1,8 +1,11 @@
 {
-  "name": "alsala---jadwal-sholat",
+  "name": "alsala",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "description": "Aplikasi jadwal sholat modern yang akurat, estetis, dan responsif",
+  "author": "Ryan Sutrisno",
+  "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -16,9 +19,25 @@
     "react-dom": "^19.2.1"
   },
   "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.0",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^10.0.0",
+    "@semantic-release/npm": "^12.0.0",
+    "@semantic-release/release-notes-generator": "^14.0.0",
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
+    "conventional-changelog-conventionalcommits": "^8.0.0",
+    "semantic-release": "^24.0.0",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/username/alsala.git"
+  },
+  "bugs": {
+    "url": "https://github.com/username/alsala/issues"
+  },
+  "homepage": "https://alsala.netlify.app"
 }
