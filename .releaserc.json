@@ -42,9 +42,7 @@
       "@semantic-release/changelog",
       {
         "changelogFile": "CHANGELOG.md",
-        "changelogTitle": "# Changelog
-
-Semua perubahan yang signifikan pada proyek ini akan didokumentasikan dalam file ini."
+        "changelogTitle": "# Changelog\n\nSemua perubahan yang signifikan pada proyek ini akan didokumentasikan dalam file ini."
       }
     ],
     [
