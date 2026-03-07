@@ -80,7 +80,7 @@ export default defineConfig(({ mode }) => {
           },
           workbox: {
             maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
-            globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+            globPatterns: ['**/*.{js,css,html,ico,png,svg,mp3}'],
             runtimeCaching: [
               {
                 urlPattern: /^https:\/\/api\.aladhan\.com\/v1\/.*/i,
@@ -115,6 +115,20 @@ export default defineConfig(({ mode }) => {
                   expiration: {
                     maxEntries: 1,
                     maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+                  }
+                }
+              },
+              {
+                urlPattern: /\/Adzan.*\.mp3$/i,
+                handler: 'CacheFirst',
+                options: {
+                  cacheName: 'adzan-audio-cache',
+                  expiration: {
+                    maxEntries: 10,
+                    maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+                  },
+                  cacheableResponse: {
+                    statuses: [0, 200]
                   }
                 }
               }

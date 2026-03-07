@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { MapPin, Navigation, RefreshCw, Search, X, Loader2, Volume2, VolumeX } from 'lucide-react';
+import { MapPin, Navigation, RefreshCw, Search, X, Loader2, Volume2, VolumeX, Bell, BellOff } from 'lucide-react';
 import Clock from './components/Clock';
 import PrayerList from './components/PrayerList';
 import InspirationCard from './components/InspirationCard';
 import { getPrayerTimes, getNextPrayer, searchLocation } from './services/prayerService';
 import { getDailyInspiration } from './services/quoteService';
+import { schedulePrayerNotifications, clearAllNotifications, requestNotificationPermission, initNotifications, isNotificationSupported, getNotificationPermission } from './services/notificationService';
 import { Coordinates, PrayerApiResponse, InspirationContent, LocationResult } from './types';
 
 // Audio Sources
@@ -33,6 +34,17 @@ const App: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<LocationResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+
+  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(() => {
+    const saved = localStorage.getItem('waqt_notifications_enabled');
+    return saved === 'true';
+  });
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>(() => {
+    if (isNotificationSupported()) {
+      return getNotificationPermission();
+    }
+    return 'denied';
+  });
 
   // Fallback to Monas, Jakarta if geolocation fails
   const DEFAULT_COORDS = { latitude: -6.1751, longitude: 106.8650, locationName: "Jakarta Pusat" };
@@ -242,6 +254,23 @@ const App: React.FC = () => {
     return () => clearInterval(interval);
   }, [fetchInspiration]);
 
+  useEffect(() => {
+    initNotifications();
+
+    if (prayerData && notificationsEnabled && notificationPermission === 'granted') {
+      const timings = prayerData.data.timings;
+      schedulePrayerNotifications(timings as Record<string, string>)
+        .then(() => console.log('[App] Notifications scheduled'))
+        .catch(err => console.error('[App] Failed to schedule notifications:', err));
+    }
+
+    return () => {
+      if (notificationsEnabled) {
+        clearAllNotifications();
+      }
+    };
+  }, [prayerData, notificationsEnabled, notificationPermission]);
+
   // Audio Event Listeners
   useEffect(() => {
     const audio = audioRef.current;
@@ -252,21 +281,38 @@ const App: React.FC = () => {
     return () => audio.removeEventListener('ended', handleEnded);
   }, []);
 
-  const toggleMute = () => {
-    setIsMuted(!isMuted);
+  const toggleMute = async () => {
+    const newMutedState = !isMuted;
+    setIsMuted(newMutedState);
     setShowAudioHint(false);
-    
-    // Explicitly try to play/pause to ensure browser knows user intended to use audio
+
     if (audioRef.current) {
-      if (isMuted) {
-        // Unmuting: Prepare audio (load)
+      if (newMutedState) {
         audioRef.current.load();
       } else {
-        // Muting
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
         setIsPlaying(false);
       }
+    }
+
+    if (!newMutedState && !notificationsEnabled) {
+      const permission = await requestNotificationPermission();
+      setNotificationPermission(permission);
+      
+      if (permission === 'granted') {
+        setNotificationsEnabled(true);
+        localStorage.setItem('waqt_notifications_enabled', 'true');
+        
+        if (prayerData) {
+          const timings = prayerData.data.timings;
+          await schedulePrayerNotifications(timings as Record<string, string>);
+        }
+      }
+    } else if (newMutedState && notificationsEnabled) {
+      setNotificationsEnabled(false);
+      localStorage.setItem('waqt_notifications_enabled', 'false');
+      await clearAllNotifications();
     }
   };
 
@@ -336,10 +382,16 @@ const App: React.FC = () => {
               >
                  {isMuted ? <VolumeX className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
                  <span className="hidden xs:inline">{isMuted ? "Adzan Off" : isPlaying ? "Adzan Berkumandang" : "Adzan On"}</span>
-                 <span className="xs:hidden">{isMuted ? "Adzan Off" : "Adzan On"}</span>
-              </button>
+                  <span className="xs:hidden">{isMuted ? "Adzan Off" : "Adzan On"}</span>
+               </button>
 
-              <div className="text-center sm:text-right">
+               {!isMuted && notificationPermission === 'granted' && (
+                 <div className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] bg-sky-500/20 text-sky-300" title={notificationsEnabled ? "Notifikasi aktif" : "Notifikasi nonaktif"}>
+                   {notificationsEnabled ? <Bell className="w-3 h-3" /> : <BellOff className="w-3 h-3" />}
+                 </div>
+               )}
+
+               <div className="text-center sm:text-right">
                  <button 
                    onClick={() => setIsSearchOpen(true)}
                    className="flex items-center gap-1.5 sm:gap-2 justify-center sm:justify-end text-sky-300 text-xs sm:text-sm mb-0.5 sm:mb-1 hover:text-white transition-colors group cursor-pointer"
