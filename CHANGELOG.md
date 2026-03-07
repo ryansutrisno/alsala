@@ -2,6 +2,12 @@
 
 Semua perubahan yang signifikan pada proyek ini akan didokumentasikan dalam file ini.
 
+## [2.1.0](https://github.com/ryansutrisno/alsala/compare/v2.0.1...v2.1.0) (2026-03-07)
+
+### ✨ Features
+
+* add local notification support for Adzan in PWA ([c4ab414](https://github.com/ryansutrisno/alsala/commit/c4ab41441e0a307775fd192699804b2447a36509))
+
 ## [2.0.1](https://github.com/ryansutrisno/alsala/compare/v2.0.0...v2.0.1) (2026-03-07)
 
 ### 🐛 Bug Fixes
