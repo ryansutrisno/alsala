@@ -2,6 +2,12 @@
 
 Semua perubahan yang signifikan pada proyek ini akan didokumentasikan dalam file ini.
 
+## [2.1.1](https://github.com/ryansutrisno/alsala/compare/v2.1.0...v2.1.1) (2026-04-04)
+
+### 🐛 Bug Fixes
+
+* prevent double adzan sound playback with cooldown deduplication ([c49ab40](https://github.com/ryansutrisno/alsala/commit/c49ab406c031e5aa444908ce89658c83168cad4d))
+
 ## [2.1.0](https://github.com/ryansutrisno/alsala/compare/v2.0.1...v2.1.0) (2026-03-07)
 
 ### ✨ Features
