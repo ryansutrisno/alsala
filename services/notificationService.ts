@@ -41,6 +41,12 @@ const ADHAN_GENERAL_URL = '/Adzan_Mekkah_Versi_Full.mp3';
 const NOTIFICATION_PERMISSION_KEY = 'waqt_notification_permission';
 const NOTIFICATION_ENABLED_KEY = 'waqt_notifications_enabled';
 
+// Global deduplication state to prevent double adzan
+let isAdzanPlaying = false;
+let currentAdzanPrayer: string | null = null;
+let lastAdzanTimestamp: number = 0;
+const ADZAN_COOLDOWN_MS = 30000; // 30 seconds cooldown between same prayer
+
 /**
  * Request notification permission from user
  * @returns Promise<NotificationPermission> - 'granted', 'denied', or 'default'
@@ -220,15 +226,46 @@ function showAdzanNotification(prayerName: string, prayerTime: string, audioUrl:
 }
 
 /**
- * Play adzan audio
+ * Play adzan audio with deduplication to prevent double sound
  */
 export function playAdzanAudio(prayerName: string): void {
+  const now = Date.now();
+  
+  // Check if adzan is already playing for the same prayer
+  if (isAdzanPlaying && currentAdzanPrayer === prayerName) {
+    console.log('[Audio] Skipping - already playing for', prayerName);
+    return;
+  }
+  
+  // Check cooldown period (prevent duplicate within 30 seconds)
+  if (currentAdzanPrayer === prayerName && (now - lastAdzanTimestamp) < ADZAN_COOLDOWN_MS) {
+    console.log('[Audio] Skipping - cooldown period active for', prayerName);
+    return;
+  }
+  
+  isAdzanPlaying = true;
+  currentAdzanPrayer = prayerName;
+  lastAdzanTimestamp = now;
+  
   const audio = new Audio();
   audio.src = getAdzanAudioUrl(prayerName);
   audio.volume = 1.0;
   
+  // Reset state when audio ends or errors
+  const resetState = () => {
+    isAdzanPlaying = false;
+    currentAdzanPrayer = null;
+  };
+  
+  audio.onended = resetState;
+  audio.onerror = () => {
+    console.error('[Audio] Error playing adzan for', prayerName);
+    resetState();
+  };
+  
   audio.play().catch(error => {
     console.error('[Audio] Error playing adzan:', error);
+    resetState();
   });
 }
 
