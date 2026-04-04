@@ -24,10 +24,11 @@ const App: React.FC = () => {
   const [userInteracted, setUserInteracted] = useState<boolean>(false); // Track user interaction
   
   // Audio State
-  const [isMuted, setIsMuted] = useState<boolean>(true); // Default muted to comply with browser autoplay policies
+  const [isMuted, setIsMuted] = useState<boolean>(true);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const lastPlayedRef = useRef<string | null>(null); // To prevent looping in the same minute
+  const lastPlayedRef = useRef<string | null>(null);
+  const adzanCooldownRef = useRef<number>(0);
 
   // Search State
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -162,15 +163,18 @@ const App: React.FC = () => {
           const cleanTime = (time as string).split(' ')[0];  
   
           if (cleanTime === currentTimeStr) {
-            // Prevent re-triggering if already played for this time
             if (lastPlayedRef.current === `${name}-${cleanTime}`) return;
+            
+            const now = Date.now();
+            if (now - adzanCooldownRef.current < 30000) {
+              console.log(`[App] Skipping adzan for ${name} - cooldown active`);
+              return;
+            }
+            adzanCooldownRef.current = now;
   
-            // SKIP Non-Obligatory Prayers (Imsak, Sunrise, Sunset, Midnight, etc.)
-            // Kita hanya ingin Adzan bunyi di 5 waktu wajib
             const allowedPrayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
             if (!allowedPrayers.includes(name)) return;
   
-            // Trigger Adhan
             if (!isMuted && audioRef.current) {
                console.log(`Triggering Adhan for ${name}`);
                
