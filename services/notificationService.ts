@@ -47,6 +47,9 @@ let currentAdzanPrayer: string | null = null;
 let lastAdzanTimestamp: number = 0;
 const ADZAN_COOLDOWN_MS = 30000; // 30 seconds cooldown between same prayer
 
+// Track pending adzan timers so they can be cancelled when adzan is turned off
+const scheduledTimers = new Set<ReturnType<typeof setTimeout>>();
+
 /**
  * Request notification permission from user
  * @returns Promise<NotificationPermission> - 'granted', 'denied', or 'default'
@@ -108,6 +111,10 @@ export async function clearAllNotifications(): Promise<void> {
       });
     }
 
+    // Batalkan semua timer adzan yang masih menunggu
+    scheduledTimers.forEach((timer) => clearTimeout(timer));
+    scheduledTimers.clear();
+
     // Clear from IndexedDB
     await db.scheduledNotifications.clear();
     console.log('[Notification] All notifications cleared');
@@ -138,6 +145,18 @@ function getAdzanAudioUrl(prayerName: string): string {
 }
 
 /**
+ * Pastikan waktu sekarang masih dekat dengan jam sholat.
+ * Mencegah adzan "telat" diputar saat tab di-resume dari background (timer catch-up).
+ */
+function isWithinPrayerWindow(prayerTime: string, toleranceMinutes = 2): boolean {
+  const [h, m] = prayerTime.split(':').map(Number);
+  const now = new Date();
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const targetMinutes = h * 60 + m;
+  return Math.abs(nowMinutes - targetMinutes) <= toleranceMinutes;
+}
+
+/**
  * Schedule a single notification for a prayer time
  */
 async function scheduleNotification(
@@ -147,6 +166,12 @@ async function scheduleNotification(
 ): Promise<string | null> {
   if (!('Notification' in window) || Notification.permission !== 'granted') {
     console.log('[Notification] Permission not granted, skipping schedule');
+    return null;
+  }
+
+  // Jangan jadwalkan jika user belum/tidak mengaktifkan adzan
+  if (!isNotificationsEnabled()) {
+    console.log('[Notification] Adzan disabled by user, skipping schedule');
     return null;
   }
 
@@ -187,10 +212,20 @@ async function scheduleNotification(
   console.log(`[Notification] Scheduled ${indonesianName} at ${prayerTime} (delay: ${Math.round(delay / 1000)}s)`);
 
   // Schedule using setTimeout (for when app is open)
-  // Service Worker will handle when app is closed
-  setTimeout(() => {
+  const timer = setTimeout(() => {
+    scheduledTimers.delete(timer);
+    // Guard ganda: pastikan adzan masih aktif dan waktu memang sudah tiba
+    if (!isNotificationsEnabled()) {
+      console.log('[Notification] Adzan disabled at fire time, skipping', prayerName);
+      return;
+    }
+    if (!isWithinPrayerWindow(prayerTime)) {
+      console.log('[Notification] Skipping late/stale adzan for', prayerName);
+      return;
+    }
     showAdzanNotification(prayerName, prayerTime, audioUrl);
   }, delay);
+  scheduledTimers.add(timer);
 
   return notificationId;
 }
@@ -199,6 +234,10 @@ async function scheduleNotification(
  * Show the actual adzan notification
  */
 function showAdzanNotification(prayerName: string, prayerTime: string, audioUrl: string): void {
+  if (!isNotificationsEnabled()) {
+    return;
+  }
+
   if (Notification.permission !== 'granted') {
     return;
   }
@@ -229,6 +268,11 @@ function showAdzanNotification(prayerName: string, prayerTime: string, audioUrl:
  * Play adzan audio with deduplication to prevent double sound
  */
 export function playAdzanAudio(prayerName: string): void {
+  if (!isNotificationsEnabled()) {
+    console.log('[Audio] Skipping - adzan disabled by user');
+    return;
+  }
+
   const now = Date.now();
   
   // Check if adzan is already playing for the same prayer

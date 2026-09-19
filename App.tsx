@@ -24,7 +24,10 @@ const App: React.FC = () => {
   const [userInteracted, setUserInteracted] = useState<boolean>(false); // Track user interaction
   
   // Audio State
-  const [isMuted, setIsMuted] = useState<boolean>(true);
+  const [isMuted, setIsMuted] = useState<boolean>(() => {
+    // Sinkron dengan preferensi tersimpan: bila adzan tersimpan aktif, tombol tampil "On"
+    return localStorage.getItem('waqt_notifications_enabled') !== 'true';
+  });
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastPlayedRef = useRef<string | null>(null);
