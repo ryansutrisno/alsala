@@ -2,6 +2,12 @@
 
 Semua perubahan yang signifikan pada proyek ini akan didokumentasikan dalam file ini.
 
+## [2.1.2](https://github.com/ryansutrisno/alsala/compare/v2.1.1...v2.1.2) (2026-09-19)
+
+### 🐛 Bug Fixes
+
+* **adzan:** stop stale adzan playback when disabled or reopened ([e2e3f2b](https://github.com/ryansutrisno/alsala/commit/e2e3f2b0a22745a59e4bc268067674ec5f2a65e8))
+
 ## [2.1.1](https://github.com/ryansutrisno/alsala/compare/v2.1.0...v2.1.1) (2026-04-04)
 
 ### 🐛 Bug Fixes
