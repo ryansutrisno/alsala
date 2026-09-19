@@ -2,6 +2,16 @@
 
 Semua perubahan yang signifikan pada proyek ini akan didokumentasikan dalam file ini.
 
+## [2.2.0](https://github.com/ryansutrisno/alsala/compare/v2.1.2...v2.2.0) (2026-09-19)
+
+### ✨ Features
+
+* **inspiration:** add multi-source quote fallback chain ([b5c0566](https://github.com/ryansutrisno/alsala/commit/b5c0566905000bdf0d99c4d3b6089afa275c728d))
+
+### 🐛 Bug Fixes
+
+* **inspiration:** crossfade quote updates without layout shift ([c79aae0](https://github.com/ryansutrisno/alsala/commit/c79aae0175966cd18fb08a2c1dd3e5dab5b1a3b2))
+
 ## [2.1.2](https://github.com/ryansutrisno/alsala/compare/v2.1.1...v2.1.2) (2026-09-19)
 
 ### 🐛 Bug Fixes
