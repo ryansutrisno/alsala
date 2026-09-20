@@ -168,7 +168,7 @@ const InspirationCard: React.FC<InspirationCardProps> = ({ content, loading }) =
           */}
           <div
             ref={viewportRef}
-            className="inspirasi-marquee-viewport relative h-24 sm:h-28 lg:h-32 xl:h-36 overflow-hidden"
+            className="inspirasi-marquee-viewport relative h-24 sm:h-28 lg:h-32 xl:h-36 [@media(max-height:820px)]:xl:h-24 overflow-hidden"
           >
             {/*
               Track bergulir: key remount saat quote berganti agar animasi

@@ -580,7 +580,7 @@ const App: React.FC = () => {
 
       {/* Container melebar bertahap: mobile sempit → tablet → laptop → Smart TV (90rem),
           plus padding proporsional sebagai safe area layar TV */}
-      <div className="relative z-10 mx-auto w-full max-w-md sm:max-w-2xl lg:max-w-6xl 2xl:max-w-[90rem] px-3 sm:px-6 lg:px-10 py-3 sm:py-4 min-h-screen flex flex-col">
+      <div className="relative z-10 mx-auto w-full max-w-md sm:max-w-2xl lg:max-w-6xl 2xl:max-w-[90rem] px-3 sm:px-6 lg:px-10 py-3 sm:py-4 min-h-screen flex flex-col [@media(max-height:820px)]:py-1.5 [@media(max-height:820px)]:sm:py-2">
 
         {/* Header Section - Responsive padding
             Mobile: 2 baris rapat (brand, lalu semua kontrol dalam SATU baris yang boleh wrap)
@@ -751,13 +751,18 @@ const App: React.FC = () => {
             landscape/deskop lg+: grid dua kolom proporsional (kiri: jam + Menuju Waktu + footage,
             kanan: Waktu Shalat + Inspirasi) tanpa pita kosong kiri-kanan.
             items-stretch supaya kolom kiri bisa tumbuh dan footage rata bawah dengan kolom kanan */}
-        <main className="flex-grow w-full flex flex-col items-center lg:grid lg:grid-cols-12 lg:items-stretch gap-3 sm:gap-4 lg:gap-6 2xl:gap-8 py-2 sm:py-4 content-start">
+        <main className="flex-grow w-full flex flex-col items-center lg:grid lg:grid-cols-12 lg:items-stretch gap-3 sm:gap-4 lg:gap-6 2xl:gap-8 py-2 sm:py-4 content-start [@media(max-height:820px)]:py-0 [@media(max-height:820px)]:sm:py-1.5 [@media(max-height:820px)]:lg:gap-4 [@media(max-height:820px)]:2xl:gap-6">
 
           {/* Kolom kiri: jam / countdown iqomah + Menuju Waktu */}
           <div className="w-full max-w-md sm:max-w-2xl lg:max-w-none mx-auto flex flex-col gap-3 sm:gap-4 lg:col-span-5 lg:row-start-1">
 
-            {/* Area jam — tinggi tercadang agar pergantian phase iqomah tidak menggeser layout */}
-            <div className="relative w-full min-h-[7rem] sm:min-h-[8.5rem] lg:min-h-[11rem] xl:min-h-[12.5rem]">
+            {/* Area jam — tinggi tercadang agar pergantian phase iqomah tidak menggeser layout.
+                Mobile (<sm): reserve 5.5rem lebih rapat karena jam mobile (3.5rem–4.5rem)
+                hanya butuh ±88–96px — dulu 7rem menyisakan ruang kosong ±24px atas/bawah
+                sehingga jarak toggle lokasi → "Menuju Waktu" terasa lebar.
+                Desktop sm+ tidak berubah; frame pendek lg/xl tetap pakai reserve 9.5/10.5rem
+                soal anti-scroll 1366x768 (lihat Clock.tsx). */}
+            <div className="relative w-full min-h-[5.5rem] sm:min-h-[8.5rem] lg:min-h-[11rem] xl:min-h-[12.5rem] [@media(max-height:820px)]:lg:min-h-[9.5rem] [@media(max-height:820px)]:xl:min-h-[10.5rem]">
               {/* Layer jam normal: hanya saat phase idle (desain lama, tidak diubah) */}
               <div className={`absolute inset-0 flex items-center justify-center ${iqomahStatus.phase !== 'idle' ? 'hidden' : ''}`}>
                 <Clock />
@@ -842,7 +847,7 @@ const App: React.FC = () => {
 
         </main>
 
-        <footer className="mt-auto text-center text-slate-600 text-[10px] sm:text-xs py-2 sm:py-3 border-t border-white/5 shrink-0">
+        <footer className="mt-auto text-center text-slate-600 text-[10px] sm:text-xs py-2 sm:py-3 border-t border-white/5 shrink-0 [@media(max-height:820px)]:py-1 [@media(max-height:820px)]:sm:py-1.5">
           <p>
             &copy; {new Date().getFullYear()} Made with {' '}
             {/* Ikon hati SVG (bukan emoji) agar tampil konsisten di semua perangkat, termasuk Windows */}
