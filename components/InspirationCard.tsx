@@ -128,11 +128,11 @@ const InspirationCard: React.FC<InspirationCardProps> = ({ content, loading }) =
       aria-hidden={ariaHidden ? true : undefined}
       className="text-left"
     >
-      <blockquote className="text-base sm:text-lg font-serif text-white leading-relaxed italic">
+      <blockquote className="text-base sm:text-lg lg:text-xl xl:text-2xl font-serif text-white leading-relaxed italic">
         {bungkusKutip(displayed?.quote ?? '')}
       </blockquote>
       {displayed?.reflection && (
-        <div className="mt-2 text-xs sm:text-sm text-gray-400 border-l-2 border-purple-500/30 pl-3">
+        <div className="mt-2 text-xs sm:text-sm lg:text-base text-gray-400 border-l-2 border-purple-500/30 pl-3">
           {displayed.reflection}
         </div>
       )}
@@ -140,7 +140,7 @@ const InspirationCard: React.FC<InspirationCardProps> = ({ content, loading }) =
   );
 
   return (
-    <div className="w-full bg-gradient-to-r from-violet-900/40 to-fuchsia-900/40 border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-5 backdrop-blur-md relative overflow-hidden group">
+    <div className="w-full bg-gradient-to-r from-violet-900/40 to-fuchsia-900/40 border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-5 lg:p-6 backdrop-blur-md relative overflow-hidden group">
       {/* Gaya marquee lokal (keyframes + aturan reduced-motion) */}
       <style>{GAYA_MARQUEE}</style>
 
@@ -148,8 +148,8 @@ const InspirationCard: React.FC<InspirationCardProps> = ({ content, loading }) =
       <div className={`absolute -top-10 -right-10 w-24 sm:w-32 h-24 sm:h-32 bg-purple-500/20 rounded-full blur-3xl group-hover:bg-purple-500/30 transition-all duration-700 ${isRefreshing ? 'opacity-60' : 'opacity-100'}`} />
 
       <div className="flex items-center gap-2 mb-3 sm:mb-4 text-purple-300">
-        <Sparkles className={`w-4 h-4 sm:w-5 sm:h-5 ${isRefreshing ? 'animate-spin [animation-duration:2.5s] motion-reduce:animate-none' : ''}`} />
-        <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">Inspirasi Harian</span>
+        <Sparkles className={`w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 ${isRefreshing ? 'animate-spin [animation-duration:2.5s] motion-reduce:animate-none' : ''}`} />
+        <span className="text-xs sm:text-sm lg:text-base font-semibold uppercase tracking-wider">Inspirasi Harian</span>
       </div>
 
       {isFirstLoad ? (
@@ -168,7 +168,7 @@ const InspirationCard: React.FC<InspirationCardProps> = ({ content, loading }) =
           */}
           <div
             ref={viewportRef}
-            className="inspirasi-marquee-viewport relative h-24 sm:h-28 overflow-hidden"
+            className="inspirasi-marquee-viewport relative h-24 sm:h-28 lg:h-32 xl:h-36 overflow-hidden"
           >
             {/*
               Track bergulir: key remount saat quote berganti agar animasi
@@ -198,7 +198,7 @@ const InspirationCard: React.FC<InspirationCardProps> = ({ content, loading }) =
 
           {/* Sumber tetap diam di kanan bawah, di luar area bergulir */}
           <div className="flex justify-end border-t border-white/10 pt-3 sm:pt-4">
-            <div className="flex items-center text-sky-400 text-xs sm:text-sm font-medium whitespace-nowrap bg-sky-500/10 px-2 sm:px-3 py-1 rounded-full">
+            <div className="flex items-center text-sky-400 text-xs sm:text-sm lg:text-base font-medium whitespace-nowrap bg-sky-500/10 px-2 sm:px-3 py-1 rounded-full">
               <span>{displayed.source}</span>
             </div>
           </div>

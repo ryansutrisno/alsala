@@ -32,24 +32,25 @@ const IqomahCountdownDisplay: React.FC<IqomahCountdownDisplayProps> = ({
   const gayaAngka = 'font-bold font-mono tabular-nums tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-200 via-white to-blue-200 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]';
 
   return (
-    <div className="text-center px-2 flex flex-col items-center justify-center gap-2">
+    <div className="text-center px-2 flex flex-col items-center justify-center gap-2 sm:gap-3">
 
       {phase === 'counting' && (
         <>
-          <p className="text-blue-200 text-sm sm:text-base font-light tracking-widest uppercase">
+          <p className="text-blue-200 text-sm sm:text-base lg:text-xl font-light tracking-widest uppercase">
             Iqomah {activePrayerName ?? ''}
           </p>
-          {/* Hitung mundur besar — aria-live agar pembaca layar mendengar berjalan waktu */}
+          {/* Hitung mundur besar — aria-live agar pembaca layar mendengar berjalan waktu;
+              font-mono + tabular-nums agar digit tidak bergoyang; clamp agar terbaca dari TV */}
           <p
             aria-live="polite"
             aria-atomic="true"
-            className={`${gayaAngka} text-5xl xs:text-6xl sm:text-7xl`}
+            className={`${gayaAngka} text-[clamp(3rem,7.5vw,7.5rem)]`}
           >
             {formatCountdown(msLeft ?? 0)}
           </p>
           {/* Pengingat hanya saat adzan otomatis Off */}
           {adzanReminder && (
-            <p className="text-[10px] sm:text-xs text-red-300 font-medium">
+            <p className="text-xs sm:text-sm text-red-300 font-medium">
               Adzan otomatis nonaktif — kumandangkan adzan manual.
             </p>
           )}
@@ -60,7 +61,7 @@ const IqomahCountdownDisplay: React.FC<IqomahCountdownDisplayProps> = ({
         <>
           {/* Penekanan saat alarm berbunyi: ring amber + denyut halus (hormati reduced motion) */}
           <div
-            className={`relative flex flex-col items-center gap-2 rounded-2xl px-4 sm:px-6 py-3 sm:py-4 border transition-colors motion-reduce:transition-none ${
+            className={`relative flex flex-col items-center gap-2 sm:gap-3 rounded-2xl px-5 sm:px-8 py-4 sm:py-5 border transition-colors motion-reduce:transition-none ${
               alarmPlaying
                 ? 'border-amber-400/60 bg-amber-500/10'
                 : 'border-white/10 bg-white/5'
@@ -69,11 +70,11 @@ const IqomahCountdownDisplay: React.FC<IqomahCountdownDisplayProps> = ({
             {alarmPlaying && (
               <div aria-hidden="true" className="absolute inset-0 rounded-2xl ring-2 ring-amber-400/70 animate-pulse motion-reduce:animate-none pointer-events-none" />
             )}
-            <div className="flex items-center gap-2 text-amber-300">
-              <AlarmClock className="w-5 h-5 sm:w-6 sm:h-6" />
-              <p className="text-2xl sm:text-3xl font-bold uppercase tracking-wider">Waktunya Iqomah</p>
+            <div className="flex items-center gap-2 sm:gap-3 text-amber-300">
+              <AlarmClock className="w-6 h-6 sm:w-8 sm:h-8" />
+              <p className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold uppercase tracking-wider">Waktunya Iqomah</p>
             </div>
-            <p className="text-xs sm:text-sm text-blue-200/80">Silakan kumandangkan iqomah.</p>
+            <p className="text-sm sm:text-base text-blue-200/90">Silakan kumandangkan iqomah.</p>
 
             {alarmPlaying && (
               <button
@@ -81,9 +82,9 @@ const IqomahCountdownDisplay: React.FC<IqomahCountdownDisplayProps> = ({
                 onClick={onStopAlarm}
                 title="Matikan Alarm"
                 aria-label="Matikan Alarm"
-                className="mt-1 inline-flex items-center gap-2 rounded-lg bg-amber-500/20 border border-amber-400/50 text-amber-300 px-4 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold hover:bg-amber-500/30 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/70"
+                className="mt-1 inline-flex items-center gap-2 rounded-lg bg-amber-500/20 border border-amber-400/50 text-amber-300 px-5 sm:px-7 py-2.5 sm:py-3 text-sm sm:text-base font-semibold hover:bg-amber-500/30 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/70"
               >
-                <Square className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <Square className="w-4 h-4 sm:w-5 sm:h-5" />
                 Matikan Alarm
               </button>
             )}

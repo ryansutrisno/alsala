@@ -55,7 +55,7 @@ const IqomahDurationModal: React.FC<IqomahDurationModalProps> = ({
           </button>
         </div>
 
-        {/* Daftar opsi durasi sebagai tombol besar; opsi terpilih ditandai jelas */}
+        {/* Daftar opsi durasi sebagai tombol besar (target sentuh/klik luas untuk TV & tablet) */}
         <div className="p-3 sm:p-4 grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
           {IQOMAH_OPTIONS.map((nilai) => {
             const aktif = nilai === minutes;
@@ -66,11 +66,11 @@ const IqomahDurationModal: React.FC<IqomahDurationModalProps> = ({
                 onClick={() => pilihDurasi(nilai)}
                 aria-pressed={aktif}
                 className={`
-                  w-full text-center px-3 py-3 sm:py-4 rounded-xl text-base sm:text-lg font-semibold border transition-colors
+                  w-full text-center px-3 py-4 sm:py-5 rounded-xl text-lg sm:text-xl font-semibold border transition-colors
                   focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70
                   ${aktif
                     ? 'bg-sky-500/20 border-sky-400/50 text-sky-300'
-                    : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10'
+                    : 'bg-white/5 border-white/10 text-gray-200 hover:bg-white/10'
                   }
                 `}
               >

@@ -22,7 +22,10 @@ const PRAYER_LABELS: Record<(typeof REQUIRED_PRAYER_NAMES)[number], string> = {
   Maghrib: 'Maghrib',
   Isha: 'Isya',
 };
-const IQOMAH_GRACE_MS = 10 * 60 * 1000;
+// Alarm iqomah mulai berbunyi 10 detik terakhir sebelum countdown habis
+const IQOMAH_PRE_ALARM_MS = 10 * 1000;
+// Wording "Waktunya Iqomah" tampil singkat (sisa alarm setelah countdown habis), lalu kembali ke jam
+const IQOMAH_DISPLAY_MS = 10 * 1000;
 const ALARM_WINDOW_MS = 90 * 1000;
 
 const App: React.FC = () => {
@@ -105,7 +108,7 @@ const App: React.FC = () => {
       if (nowMs >= prayerTimeMs && nowMs < iqomahTargetMs) {
         phase = 'counting';
         msLeft = iqomahTargetMs - nowMs;
-      } else if (nowMs >= iqomahTargetMs && nowMs < iqomahTargetMs + IQOMAH_GRACE_MS) {
+      } else if (nowMs >= iqomahTargetMs && nowMs < iqomahTargetMs + IQOMAH_DISPLAY_MS) {
         phase = 'iqomah';
         msLeft = 0;
       }
@@ -330,9 +333,10 @@ const App: React.FC = () => {
           playAlarm('adzan-manual');
         }
 
+        const iqomahAlarmAt = iqomahTarget.getTime() - IQOMAH_PRE_ALARM_MS;
         if (
           !fired.iqomah &&
-          Math.abs(now.getTime() - iqomahTarget.getTime()) <= ALARM_WINDOW_MS
+          Math.abs(now.getTime() - iqomahAlarmAt) <= ALARM_WINDOW_MS
         ) {
           fired.iqomah = true;
           playAlarm('iqomah');
@@ -506,17 +510,19 @@ const App: React.FC = () => {
          <div className="absolute top-[40%] -right-[10%] w-[40%] h-[40%] bg-purple-600/10 rounded-full blur-[120px]" />
       </div>
 
-      <div className="relative z-10 container mx-auto px-3 sm:px-4 py-3 sm:py-4 min-h-screen flex flex-col">
+      {/* Container melebar bertahap: mobile sempit → tablet → laptop → Smart TV (90rem),
+          plus padding proporsional sebagai safe area layar TV */}
+      <div className="relative z-10 mx-auto w-full max-w-md sm:max-w-2xl lg:max-w-6xl 2xl:max-w-[90rem] px-3 sm:px-6 lg:px-10 py-3 sm:py-4 min-h-screen flex flex-col">
         
         {/* Header Section - Responsive padding */}
         <header className="flex flex-col sm:flex-row justify-between items-center mb-3 sm:mb-4 gap-3 sm:gap-4 shrink-0">
-           <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center shadow-lg shadow-sky-500/20 shrink-0">
-                 <Navigation className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+           <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center shadow-lg shadow-sky-500/20 shrink-0">
+                 <Navigation className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
-                <h1 className="text-lg sm:text-xl font-bold tracking-tight text-white">Alsala</h1>
-                <p className="text-[10px] sm:text-xs text-sky-200/60 font-medium tracking-wider">JADWAL SHOLAT DIGITAL</p>
+                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-white">Alsala</h1>
+                <p className="text-[10px] sm:text-xs lg:text-sm text-sky-200/70 font-medium tracking-wider">JADWAL SHOLAT DIGITAL</p>
               </div>
            </div>
 
@@ -524,14 +530,16 @@ const App: React.FC = () => {
               {/* Volume Control */}
               <button 
                  onClick={toggleMute}
-                 className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-medium transition-all ${
+                  title={isMuted ? "Adzan otomatis nonaktif — alarm pengingat adzan akan berbunyi di waktu sholat" : "Adzan otomatis aktif — alarm pengingat adzan tidak berbunyi"}
+                  aria-label={isMuted ? "Adzan otomatis nonaktif — alarm pengingat adzan akan berbunyi di waktu sholat" : "Adzan otomatis aktif — alarm pengingat adzan tidak berbunyi"}
+                 className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 lg:px-4 py-1 sm:py-1.5 lg:py-2 rounded-full text-[10px] sm:text-xs lg:text-sm font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70 ${
                    isMuted 
                      ? 'bg-red-500/20 text-red-300 hover:bg-red-500/30' 
                      : 'bg-green-500/20 text-green-300 hover:bg-green-500/30'
                  } ${isPlaying ? 'animate-pulse ring-1 ring-green-400' : ''}`}
               >
                  {isMuted ? <VolumeX className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-                 <span className="hidden xs:inline">{isMuted ? "Adzan Off" : isPlaying ? "Adzan Berkumandang" : "Adzan On"}</span>
+                 <span className="hidden xs:inline">{isMuted ? "Adzan Otomatis Off" : isPlaying ? "Adzan Berkumandang" : "Adzan Otomatis On"}</span>
                   <span className="xs:hidden">{isMuted ? "Adzan Off" : "Adzan On"}</span>
                 </button>
 
@@ -540,7 +548,7 @@ const App: React.FC = () => {
                   onClick={() => setIsIqomahModalOpen(true)}
                   title="Durasi Iqomah"
                   aria-label="Ubah durasi iqomah"
-                  className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-medium bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400/70 cursor-pointer"
+                  className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 lg:px-4 py-1 sm:py-1.5 lg:py-2 rounded-full text-[10px] sm:text-xs lg:text-sm font-medium bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400/70 cursor-pointer"
                 >
                   <Timer className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   <span className="hidden xs:inline">Iqomah {iqomahMinutes} menit</span>
@@ -556,15 +564,15 @@ const App: React.FC = () => {
                <div className="text-center sm:text-right">
                  <button 
                    onClick={() => setIsSearchOpen(true)}
-                   className="flex items-center gap-1.5 sm:gap-2 justify-center sm:justify-end text-sky-300 text-xs sm:text-sm mb-0.5 sm:mb-1 hover:text-white transition-colors group cursor-pointer"
+                   className="flex items-center gap-1.5 sm:gap-2 justify-center sm:justify-end text-sky-300 text-xs sm:text-sm lg:text-base mb-0.5 sm:mb-1 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70 rounded group cursor-pointer"
                  >
                     <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:animate-bounce" />
-                    <span className="truncate max-w-[150px] sm:max-w-[200px]">
+                    <span className="truncate max-w-[150px] sm:max-w-[200px] xl:max-w-[280px]">
                       {coords?.locationName || prayerData?.data.meta.timezone || "Cari Lokasi..."}
                     </span>
-                    <span className="text-[10px] bg-white/10 px-1 sm:px-1.5 py-0.5 rounded text-sky-200">Ubah</span>
+                    <span className="text-[10px] sm:text-xs bg-white/10 px-1 sm:px-1.5 py-0.5 rounded text-sky-200">Ubah</span>
                  </button>
-                 <p className="text-[10px] sm:text-xs text-gray-500 bg-white/5 py-0.5 sm:py-1 px-2 sm:px-3 rounded-full inline-block backdrop-blur-sm">
+                 <p className="text-[10px] sm:text-xs lg:text-sm text-gray-400 bg-white/5 py-0.5 sm:py-1 px-2 sm:px-3 rounded-full inline-block backdrop-blur-sm">
                     {prayerData?.data.date.hijri.day} {prayerData?.data.date.hijri.month.en} {prayerData?.data.date.hijri.year}
                  </p>
               </div>
@@ -635,84 +643,92 @@ const App: React.FC = () => {
           />
         )}
 
-        {/* Main Content Area - Satu kolom terpusat (desktop identik dengan mobile)
-            Urutan: Jam → Waktu Shalat → Inspirasi Harian. */}
-        <main className="flex-grow flex flex-col items-center py-2 sm:py-4 content-start">
-          <div className="w-full max-w-md mx-auto flex flex-col gap-3 sm:gap-4">
+        {/* Main Content Area — mobile satu kolom (Jam → Waktu Shalat → Inspirasi),
+            landscape/deskop lg+: grid dua kolom proporsional (kiri: jam + Menuju Waktu,
+            kanan: Waktu Shalat + Inspirasi) tanpa pita kosong kiri-kanan */}
+        <main className="flex-grow w-full flex flex-col items-center lg:grid lg:grid-cols-12 lg:items-center gap-3 sm:gap-4 lg:gap-6 2xl:gap-8 py-2 sm:py-4 content-start">
 
-            {/* Area jam — tinggi tercadang agar pergantian phase iqomah tidak menggeser layout */}
-            <div className="relative w-full min-h-[7rem] sm:min-h-[8.5rem] lg:min-h-[11rem]">
-              {/* Layer jam normal: hanya saat phase idle (desain lama, tidak diubah) */}
-              <div className={`absolute inset-0 flex items-center justify-center ${iqomahStatus.phase !== 'idle' ? 'hidden' : ''}`}>
-                <Clock />
+            {/* Kolom kiri: jam / countdown iqomah + Menuju Waktu */}
+            <div className="w-full max-w-md sm:max-w-2xl lg:max-w-none mx-auto flex flex-col gap-3 sm:gap-4 lg:col-span-5 lg:row-start-1">
+
+              {/* Area jam — tinggi tercadang agar pergantian phase iqomah tidak menggeser layout */}
+              <div className="relative w-full min-h-[7rem] sm:min-h-[8.5rem] lg:min-h-[11rem] xl:min-h-[12.5rem]">
+                {/* Layer jam normal: hanya saat phase idle (desain lama, tidak diubah) */}
+                <div className={`absolute inset-0 flex items-center justify-center ${iqomahStatus.phase !== 'idle' ? 'hidden' : ''}`}>
+                  <Clock />
+                </div>
+
+                {/* Layer hitung mundur: menggantikan jam pada phase counting/iqomah */}
+                {iqomahStatus.phase !== 'idle' && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <IqomahCountdownDisplay
+                      phase={iqomahStatus.phase}
+                      activePrayerName={iqomahStatus.activePrayerName}
+                      msLeft={iqomahStatus.msLeft}
+                      adzanReminder={isMuted}
+                      alarmPlaying={alarmPlaying}
+                      onStopAlarm={handleStopAlarm}
+                    />
+                  </div>
+                )}
               </div>
 
-              {/* Layer hitung mundur: menggantikan jam pada phase counting/iqomah */}
-              {iqomahStatus.phase !== 'idle' && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <IqomahCountdownDisplay
-                    phase={iqomahStatus.phase}
-                    activePrayerName={iqomahStatus.activePrayerName}
-                    msLeft={iqomahStatus.msLeft}
-                    adzanReminder={isMuted}
-                    alarmPlaying={alarmPlaying}
-                    onStopAlarm={handleStopAlarm}
-                  />
+              {nextPrayer && (
+                <div className="text-center animate-fade-in-up">
+                  <p className="text-slate-200 text-xs sm:text-sm uppercase tracking-widest mb-1">Menuju Waktu</p>
+                  <div className="inline-flex items-center gap-2 sm:gap-3 bg-white/5 border border-white/10 px-3 sm:px-5 py-1 sm:py-1.5 rounded-full backdrop-blur-sm">
+                      {/* Nama waktu memakai label Indonesia yang konsisten (Subuh/Dzuhur/Ashar/Maghrib/Isya) */}
+                      <span className="text-base sm:text-xl lg:text-2xl font-bold text-sky-400">
+                        {PRAYER_LABELS[nextPrayer.name as keyof typeof PRAYER_LABELS] ?? nextPrayer.name}
+                      </span>
+                      <span className="w-px h-4 sm:h-5 lg:h-6 bg-white/10"></span>
+                      <span className="text-sm sm:text-lg lg:text-2xl font-mono text-white">{nextPrayer.time}</span>
+                  </div>
+                  <p className="text-gray-300 text-xs sm:text-sm lg:text-base font-medium mt-1">
+                    {Math.floor(nextPrayer.diffMs / 3600000)}j {Math.floor((nextPrayer.diffMs % 3600000) / 60000)}m lagi
+                  </p>
                 </div>
               )}
             </div>
 
-            {nextPrayer && (
-              <div className="text-center animate-fade-in-up">
-                <p className="text-slate-200 text-xs sm:text-sm font-semibold uppercase tracking-widest mb-1">Menuju Waktu</p>
-                <div className="inline-flex items-center gap-2 sm:gap-3 bg-white/5 border border-white/10 px-3 sm:px-5 py-1 sm:py-1.5 rounded-full backdrop-blur-sm">
-                    {/* Nama wktu memakai label Indonesia yang konsisten (Subuh/Dzuhur/Ashar/Maghrib/Isya) */}
-                    <span className="text-base sm:text-xl font-bold text-sky-400">
-                      {PRAYER_LABELS[nextPrayer.name as keyof typeof PRAYER_LABELS] ?? nextPrayer.name}
-                    </span>
-                    <span className="w-px h-4 sm:h-5 bg-white/10"></span>
-                    <span className="text-sm sm:text-lg font-mono text-white">{nextPrayer.time}</span>
-                </div>
-                <p className="text-gray-300 text-xs sm:text-sm font-medium mt-1">
-                  {Math.floor(nextPrayer.diffMs / 3600000)}j {Math.floor((nextPrayer.diffMs % 3600000) / 60000)}m lagi
-                </p>
-              </div>
-            )}
+            {/* Kolom kanan: Waktu Shalat + Inspirasi Harian */}
+            <div className="w-full max-w-md sm:max-w-2xl lg:max-w-none mx-auto flex flex-col gap-3 sm:gap-4 lg:col-span-7 lg:row-start-1">
 
-            {/* Waktu Shalat */}
-            <section className="w-full">
-                {loading ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 lg:gap-4">
-                    {[...Array(6)].map((_, i) => (
-                      <div key={i} className="h-20 sm:h-24 lg:h-32 bg-white/5 rounded-2xl animate-pulse"></div>
-                    ))}
-                  </div>
-                ) : prayerData ? (
-                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 lg:gap-4">
-                      <PrayerList
-                          timings={prayerData.data.timings}
-                          nextPrayer={nextPrayer?.name || ''}
-                       />
-                   </div>
-                ) : (
-                   <div className="text-center p-6 sm:p-10 bg-red-500/10 rounded-xl border border-red-500/20">
-                      <p className="text-red-400 text-sm">{error || "Data tidak tersedia."}</p>
-                      <button
-                         onClick={() => coords && fetchData(coords)}
-                         className="mt-4 flex items-center justify-center gap-2 mx-auto px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-200 rounded-lg transition-colors"
-                      >
-                         <RefreshCw className="w-4 h-4" /> Coba Lagi
-                      </button>
-                   </div>
-                 )}
-            </section>
+              {/* Waktu Shalat */}
+              <section className="w-full">
+                  {loading ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 lg:gap-4">
+                      {[...Array(6)].map((_, i) => (
+                        <div key={i} className="h-20 sm:h-24 lg:h-32 bg-white/5 rounded-2xl animate-pulse"></div>
+                      ))}
+                    </div>
+                  ) : prayerData ? (
+                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 lg:gap-4">
+                        <PrayerList
+                            timings={prayerData.data.timings}
+                            nextPrayer={nextPrayer?.name || ''}
+                         />
+                     </div>
+                  ) : (
+                     <div className="text-center p-6 sm:p-10 bg-red-500/10 rounded-xl border border-red-500/20">
+                        <p className="text-red-400 text-sm">{error || "Data tidak tersedia."}</p>
+                        <button
+                           onClick={() => coords && fetchData(coords)}
+                           className="mt-4 flex items-center justify-center gap-2 mx-auto px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-200 rounded-lg transition-colors"
+                        >
+                           <RefreshCw className="w-4 h-4" /> Coba Lagi
+                        </button>
+                     </div>
+                   )}
+              </section>
 
-            {/* Inspirasi harian — selalu di bawah daftar waktu shalat, satu render untuk semua breakpoint */}
-            <section className="w-full">
-               <InspirationCard content={inspiration} loading={loadingInspiration} />
-            </section>
+              {/* Inspirasi harian — selalu di bawah daftar waktu shalat, satu render untuk semua breakpoint */}
+              <section className="w-full">
+                 <InspirationCard content={inspiration} loading={loadingInspiration} />
+              </section>
 
-          </div>
+            </div>
+
         </main>
 
         <footer className="mt-auto text-center text-slate-600 text-[10px] sm:text-xs py-2 sm:py-3 border-t border-white/5 shrink-0">
