@@ -324,10 +324,12 @@ const App: React.FC = () => {
         const fired = firedAlarmsRef.current[dateKey] ?? {};
         firedAlarmsRef.current[dateKey] = fired;
 
+        // Alarm tidak boleh berbunyi lebih awal; window hanya toleransi tick yang terlambat.
         if (
           isMuted &&
           !fired.adzan &&
-          Math.abs(now.getTime() - prayerDate.getTime()) <= ALARM_WINDOW_MS
+          now.getTime() >= prayerDate.getTime() &&
+          now.getTime() - prayerDate.getTime() <= ALARM_WINDOW_MS
         ) {
           fired.adzan = true;
           playAlarm('adzan-manual');
@@ -336,7 +338,8 @@ const App: React.FC = () => {
         const iqomahAlarmAt = iqomahTarget.getTime() - IQOMAH_PRE_ALARM_MS;
         if (
           !fired.iqomah &&
-          Math.abs(now.getTime() - iqomahAlarmAt) <= ALARM_WINDOW_MS
+          now.getTime() >= iqomahAlarmAt &&
+          now.getTime() - iqomahAlarmAt <= ALARM_WINDOW_MS
         ) {
           fired.iqomah = true;
           playAlarm('iqomah');
