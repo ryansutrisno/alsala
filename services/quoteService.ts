@@ -521,12 +521,34 @@ function getNonEmptyString(value: unknown): string | null {
   return typeof value === 'string' && value.trim() ? value.trim() : null;
 }
 
+function bersihkanTeksTerjemahan(text: string): string {
+  return text
+    .replace(/<sup[^>]*>\s*\d*\s*<\/sup>/gi, '')
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/<[^>]*>/g, '')
+    .replace(/&quot;|&#34;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&#(\d+);/g, (match: string, code: string) => {
+      const codePoint = Number(code);
+      return Number.isInteger(codePoint) && codePoint >= 0 && codePoint <= 0x10ffff
+        ? String.fromCodePoint(codePoint)
+        : match;
+    })
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 function getVerseTranslation(verse: Record<string, unknown>): string | null {
   if (!Array.isArray(verse.translations) || !isRecord(verse.translations[0])) {
     return null;
   }
 
-  return getNonEmptyString(verse.translations[0].text);
+  const text = getNonEmptyString(verse.translations[0].text);
+  return text ? bersihkanTeksTerjemahan(text) : null;
 }
 
 function parseIslamicApp(data: unknown): InspirationContent | null {
@@ -573,7 +595,8 @@ function parseAlquranCloud(data: unknown): InspirationContent | null {
   }
 
   const verse = data.data;
-  const quote = getNonEmptyString(verse.text);
+  const text = getNonEmptyString(verse.text);
+  const quote = text ? bersihkanTeksTerjemahan(text) : null;
   const surah = verse.surah;
   if (!isRecord(surah)) {
     return null;
