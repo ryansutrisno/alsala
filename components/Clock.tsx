@@ -19,6 +19,18 @@ const Clock: React.FC = () => {
     });
   };
 
+  // Nama hari memakai ejaan "Ahad" (bukan "Minggu" bawaan locale id-ID)
+  const HARI = ['Ahad', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+
+  const formatDate = (date: Date) => {
+    const tanggal = date.toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+    return `${HARI[date.getDay()]}, ${tanggal}`;
+  };
+
   return (
     <div className="text-center px-2">
       {/* Jam sangat besar untuk dibaca dari jarak jauh (laptop/tablet/Smart TV);
@@ -27,7 +39,7 @@ const Clock: React.FC = () => {
         {formatTime(time)}
       </h2>
       <p className="text-blue-200 mt-2 sm:mt-3 text-xs sm:text-base md:text-lg xl:text-xl font-light tracking-widest uppercase">
-        {time.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+        {formatDate(time)}
       </p>
     </div>
   );
