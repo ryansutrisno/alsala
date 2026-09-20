@@ -48,12 +48,11 @@ const IqomahCountdownDisplay: React.FC<IqomahCountdownDisplayProps> = ({
           >
             {formatCountdown(msLeft ?? 0)}
           </p>
-          {/* Pengingat hanya saat adzan otomatis Off */}
-          {adzanReminder && (
-            <p className="text-xs sm:text-sm text-red-300 font-medium">
-              Adzan otomatis nonaktif — kumandangkan adzan manual.
-            </p>
-          )}
+          {/* Pengingat adzan manual tidak dirender lagi di sini:
+              menambah baris di bawah angka membuat konten absolut meluber
+              keluar dari area jam (min-h tercadang) dan menutupi blok "MENUJU WAKTU".
+              Status adzan Off sudah terlihat di tombol header "Adzan Off".
+              Prop adzanReminder tetap dipertahankan agar kontrak props tidak berubah. */}
         </>
       )}
 
