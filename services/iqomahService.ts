@@ -6,6 +6,9 @@ const STORAGE_KEY = 'waqt_iqomah_minutes';
 const ALARM_MAX_DURATION_MS = 20_000;
 const ALARM_GAIN = 0.15;
 const ALARM_INACTIVE_MESSAGE = '[Alarm] AudioContext tidak aktif — alarm butuh interaksi user lebih dulu';
+// Nada alarm dibedakan agar tidak tertukar: pengingat adzan manual lebih rendah daripada alarm iqomah
+const ADZAN_MANUAL_FREQUENCY = 587;
+const IQOMAH_FREQUENCY = 880;
 
 let audioContext: AudioContext | null = null;
 
@@ -154,7 +157,7 @@ function scheduleIqomahPattern(alarm: ActiveAlarm, context: AudioContext): void 
   const scheduleBeeps = (): void => {
     const startTime = context.currentTime;
 
-    frequencyParam.setValueAtTime(880, startTime);
+    frequencyParam.setValueAtTime(IQOMAH_FREQUENCY, startTime);
     gainParam.cancelScheduledValues(startTime);
     gainParam.setValueAtTime(0, startTime);
 
@@ -231,7 +234,7 @@ export function playAlarm(kind: AlarmKind): void {
     activeAlarm = alarm;
 
     if (kind === 'adzan-manual') {
-      oscillator.frequency.setValueAtTime(880, context.currentTime);
+      oscillator.frequency.setValueAtTime(ADZAN_MANUAL_FREQUENCY, context.currentTime);
       scheduleAdzanPattern(alarm, context);
     } else {
       scheduleIqomahPattern(alarm, context);
