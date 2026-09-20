@@ -518,32 +518,38 @@ const App: React.FC = () => {
           plus padding proporsional sebagai safe area layar TV */}
       <div className="relative z-10 mx-auto w-full max-w-md sm:max-w-2xl lg:max-w-6xl 2xl:max-w-[90rem] px-3 sm:px-6 lg:px-10 py-3 sm:py-4 min-h-screen flex flex-col">
 
-        {/* Header Section - Responsive padding */}
-        <header className="flex flex-col sm:flex-row justify-between items-center mb-3 sm:mb-4 gap-3 sm:gap-4 shrink-0">
+        {/* Header Section - Responsive padding
+            Mobile: 2 baris rapat (brand, lalu semua kontrol dalam SATU baris yang boleh wrap)
+            — menghemat tinggi viewport mobile portrait.
+            Desktop (sm+): susunan menyamping, tidak berubah. */}
+        <header className="flex flex-col sm:flex-row justify-between items-center mb-2 sm:mb-4 gap-2 sm:gap-4 shrink-0">
+          {/* Baris brand: logo + wordmark + subjudul */}
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center shadow-lg shadow-sky-500/20 shrink-0">
               <Navigation className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div>
-              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-white">Alsala</h1>
+              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-white leading-tight">Alsala</h1>
               <p className="text-[10px] sm:text-xs lg:text-sm text-sky-200/70 font-medium tracking-wider">JADWAL SHOLAT DIGITAL</p>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          {/* Baris kontrol: Adzan + Iqomah + lokasi/Ubah + Hijriah dalam SATU baris (boleh wrap),
+              bukan baris-baris center terpisah; target sentuh minimal ~36px di mobile */}
+          <div className="flex flex-wrap items-center justify-center sm:justify-end gap-1.5 sm:gap-3">
             {/* Volume Control */}
             <button
               onClick={toggleMute}
               title={isMuted ? "Adzan otomatis nonaktif — alarm pengingat adzan akan berbunyi di waktu sholat" : "Adzan otomatis aktif — alarm pengingat adzan tidak berbunyi"}
               aria-label={isMuted ? "Adzan otomatis nonaktif — alarm pengingat adzan akan berbunyi di waktu sholat" : "Adzan otomatis aktif — alarm pengingat adzan tidak berbunyi"}
-              className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 lg:px-4 py-1 sm:py-1.5 lg:py-2 rounded-full text-[10px] sm:text-xs lg:text-sm font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70 ${isMuted
+              className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 lg:px-4 py-1 min-h-[2.25rem] sm:min-h-0 sm:py-1.5 lg:py-2 rounded-full text-[10px] sm:text-xs lg:text-sm font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70 ${isMuted
                   ? 'bg-red-500/20 text-red-300 hover:bg-red-500/30'
                   : 'bg-green-500/20 text-green-300 hover:bg-green-500/30'
                 } ${isPlaying ? 'animate-pulse ring-1 ring-green-400' : ''}`}
             >
               {isMuted ? <VolumeX className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-              <span className="hidden xs:inline">{isMuted ? "Adzan Otomatis Off" : isPlaying ? "Adzan Berkumandang" : "Adzan Otomatis On"}</span>
-              <span className="xs:hidden">{isMuted ? "Adzan Off" : "Adzan On"}</span>
+              <span className="hidden sm:inline">{isMuted ? "Adzan Otomatis Off" : isPlaying ? "Adzan Berkumandang" : "Adzan Otomatis On"}</span>
+              <span className="sm:hidden">{isMuted ? "Adzan Off" : "Adzan On"}</span>
             </button>
 
             {/* Tombol durasi iqomah — buka modal pemilihan durasi */}
@@ -551,31 +557,32 @@ const App: React.FC = () => {
               onClick={() => setIsIqomahModalOpen(true)}
               title="Durasi Iqomah"
               aria-label="Ubah durasi iqomah"
-              className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 lg:px-4 py-1 sm:py-1.5 lg:py-2 rounded-full text-[10px] sm:text-xs lg:text-sm font-medium bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400/70 cursor-pointer"
+              className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 lg:px-4 py-1 min-h-[2.25rem] sm:min-h-0 sm:py-1.5 lg:py-2 rounded-full text-[10px] sm:text-xs lg:text-sm font-medium bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400/70 cursor-pointer"
             >
               <Timer className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span className="hidden xs:inline">Iqomah {iqomahMinutes} menit</span>
-              <span className="xs:hidden">Iqomah</span>
+              <span className="hidden sm:inline">Iqomah {iqomahMinutes} menit</span>
+              <span className="sm:hidden">Iqomah</span>
             </button>
 
             {!isMuted && notificationPermission === 'granted' && (
-              <div className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] bg-sky-500/20 text-sky-300" title={notificationsEnabled ? "Notifikasi aktif" : "Notifikasi nonaktif"}>
+              <div className="flex items-center gap-1 px-2 py-1 min-h-[2.25rem] sm:min-h-0 rounded-full text-[10px] bg-sky-500/20 text-sky-300" title={notificationsEnabled ? "Notifikasi aktif" : "Notifikasi nonaktif"}>
                 {notificationsEnabled ? <Bell className="w-3 h-3" /> : <BellOff className="w-3 h-3" />}
               </div>
             )}
 
-            <div className="text-center sm:text-right">
+            {/* Tombol lokasi + pill tanggal Hijriah: bergerombol rapat dalam baris kontrol */}
+            <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
               <button
                 onClick={() => setIsSearchOpen(true)}
-                className="flex items-center gap-1.5 sm:gap-2 justify-center sm:justify-end text-sky-300 text-xs sm:text-sm lg:text-base mb-0.5 sm:mb-1 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70 rounded group cursor-pointer"
+                className="flex items-center gap-1.5 sm:gap-2 px-2 py-1 min-h-[2.25rem] sm:min-h-0 sm:px-0 text-sky-300 text-xs sm:text-sm lg:text-base hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70 rounded group cursor-pointer"
               >
                 <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:animate-bounce" />
-                <span className="truncate max-w-[150px] sm:max-w-[200px] xl:max-w-[280px]">
+                <span className="truncate max-w-[130px] sm:max-w-[200px] xl:max-w-[280px]">
                   {coords?.locationName || prayerData?.data.meta.timezone || "Cari Lokasi..."}
                 </span>
                 <span className="text-[10px] sm:text-xs bg-white/10 px-1 sm:px-1.5 py-0.5 rounded text-sky-200">Ubah</span>
               </button>
-              <p className="text-[10px] sm:text-xs lg:text-sm text-gray-400 bg-white/5 py-0.5 sm:py-1 px-2 sm:px-3 rounded-full inline-block backdrop-blur-sm">
+              <p className="text-[10px] sm:text-xs lg:text-sm text-gray-400 bg-white/5 py-0.5 sm:py-1 px-2 sm:px-3 rounded-full inline-flex items-center min-h-[1.5rem] backdrop-blur-sm">
                 {prayerData?.data.date.hijri.day} {prayerData?.data.date.hijri.month.en} {prayerData?.data.date.hijri.year}
               </p>
             </div>
