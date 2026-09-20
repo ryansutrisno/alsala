@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { MapPin, Navigation, RefreshCw, Search, X, Loader2, Volume2, VolumeX, Bell, BellOff, Timer } from 'lucide-react';
+import { MapPin, Navigation, RefreshCw, Search, X, Loader2, Volume2, VolumeX, Bell, BellOff, Timer, Maximize, Minimize } from 'lucide-react';
 import Clock from './components/Clock';
 import PrayerList from './components/PrayerList';
 import InspirationCard from './components/InspirationCard';
@@ -28,6 +28,30 @@ const IQOMAH_PRE_ALARM_MS = 10 * 1000;
 // Wording "Waktunya Iqomah" tampil singkat (sisa alarm setelah countdown habis), lalu kembali ke jam
 const IQOMAH_DISPLAY_MS = 10 * 1000;
 const ALARM_WINDOW_MS = 90 * 1000;
+
+// --- Dukungan Fullscreen API lintas browser (tanpa `any`) ---
+// Safari iOS tidak mendukung fullscreen pada elemen non-video, karenanya
+// di perangkat itu tombolnya tidak dirender sama sekali.
+interface DokumenFullscreen extends Document {
+  webkitFullscreenElement?: Element | null;
+  webkitExitFullscreen?: () => Promise<void> | void;
+}
+interface ElemenFullscreen extends HTMLElement {
+  webkitRequestFullscreen?: () => Promise<void> | void;
+}
+
+const bacaFullscreenElement = (): Element | null => {
+  const dokumen = document as DokumenFullscreen;
+  return dokumen.fullscreenElement ?? dokumen.webkitFullscreenElement ?? null;
+};
+
+// Deteksi dukungan sekali di modul load (statis per browser)
+const fullscreenBisaMasuk:
+  boolean = typeof (document.documentElement as ElemenFullscreen).requestFullscreen === 'function'
+  || typeof (document.documentElement as ElemenFullscreen).webkitRequestFullscreen === 'function';
+const fullscreenBisaKeluar: boolean = typeof document.exitFullscreen === 'function'
+  || typeof (document as DokumenFullscreen).webkitExitFullscreen === 'function';
+const fullscreenDidukung: boolean = fullscreenBisaMasuk && fullscreenBisaKeluar;
 
 const App: React.FC = () => {
   const [coords, setCoords] = useState<Coordinates | null>(null);
@@ -59,6 +83,9 @@ const App: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<LocationResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+
+  // State fullscreen — diinisialisasi dari elemen aktif agar tampilan konsisten saat reload
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(() => bacaFullscreenElement() !== null);
 
   // Modal durasi iqomah (dibuka dari tombol header)
   const [isIqomahModalOpen, setIsIqomahModalOpen] = useState(false);
@@ -147,6 +174,43 @@ const App: React.FC = () => {
     stopAlarm();
     setAlarmPlaying(false);
   };
+
+  // Toggle layar penuh — dibungkus try/catch + Promise catch agar tidak pernah melempar error ke UI
+  const handleToggleFullscreen = (): void => {
+    const elemen = document.documentElement as ElemenFullscreen;
+    const dokumen = document as DokumenFullscreen;
+    try {
+      if (bacaFullscreenElement() !== null) {
+        if (dokumen.exitFullscreen) {
+          dokumen.exitFullscreen().catch(() => { /* abaikan kegagalan */ });
+        } else if (dokumen.webkitExitFullscreen) {
+          dokumen.webkitExitFullscreen();
+        }
+      } else if (elemen.requestFullscreen) {
+        elemen.requestFullscreen().catch(() => { /* abaikan kegagalan */ });
+      } else if (elemen.webkitRequestFullscreen) {
+        elemen.webkitRequestFullscreen();
+      }
+    } catch {
+      // Beberapa browser menolak requestFullscreen tanpa gestur user — abaikan dengan tenang
+    }
+  };
+
+  // Sinkronisasi state fullscreen dengan event browser
+  // (user bisa keluar via tombol Escape / UI browser di luar tombol kita)
+  useEffect(() => {
+    const sinkronFullscreen = (): void => {
+      setIsFullscreen(bacaFullscreenElement() !== null);
+    };
+
+    sinkronFullscreen();
+    document.addEventListener('fullscreenchange', sinkronFullscreen);
+    document.addEventListener('webkitfullscreenchange', sinkronFullscreen);
+    return () => {
+      document.removeEventListener('fullscreenchange', sinkronFullscreen);
+      document.removeEventListener('webkitfullscreenchange', sinkronFullscreen);
+    };
+  }, []);
 
   // Fallback to Monas, Jakarta if geolocation fails
   const DEFAULT_COORDS = { latitude: -6.1751, longitude: 106.8650, locationName: "Jakarta Pusat" };
@@ -523,15 +587,33 @@ const App: React.FC = () => {
             — menghemat tinggi viewport mobile portrait.
             Desktop (sm+): susunan menyamping, tidak berubah. */}
         <header className="flex flex-col sm:flex-row justify-between items-center mb-2 sm:mb-4 gap-2 sm:gap-4 shrink-0">
-          {/* Baris brand: logo + wordmark + subjudul */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center shadow-lg shadow-sky-500/20 shrink-0">
-              <Navigation className="w-5 h-5 sm:w-6 sm:h-6" />
+          {/* Baris brand: logo + wordmark + subjudul.
+              Mobile: full width — brand di kiri, ikon layar penuh menempel di ujung kanan (sejajar logo).
+              Desktop (sm+): kembali selebar konten, ikon dipindah ke baris kontrol sebagai pill berlabel. */}
+          <div className="flex items-center justify-between gap-2 sm:gap-3 w-full sm:w-auto">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center shadow-lg shadow-sky-500/20 shrink-0">
+                <Navigation className="w-5 h-5 sm:w-6 sm:h-6" />
+              </div>
+              <div>
+                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-white leading-tight">Alsala</h1>
+                <p className="text-[10px] sm:text-xs lg:text-sm text-sky-200/70 font-medium tracking-wider">JADWAL SHOLAT DIGITAL</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-white leading-tight">Alsala</h1>
-              <p className="text-[10px] sm:text-xs lg:text-sm text-sky-200/70 font-medium tracking-wider">JADWAL SHOLAT DIGITAL</p>
-            </div>
+
+            {/* Toggle layar penuh versi mobile (<sm): ikon polos tanpa pill, sejajar kanan baris brand.
+                Desktop: disembunyikan, pill berlabel di baris kontrol yang muncul. */}
+            {fullscreenDidukung && (
+              <button
+                onClick={handleToggleFullscreen}
+                title={isFullscreen ? "Keluar layar penuh" : "Masuk layar penuh"}
+                aria-label={isFullscreen ? "Keluar layar penuh" : "Masuk layar penuh"}
+                aria-pressed={isFullscreen}
+                className="sm:hidden flex items-center justify-center min-w-[2.25rem] min-h-[2.25rem] rounded-lg text-sky-300 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70 cursor-pointer"
+              >
+                {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+              </button>
+            )}
           </div>
 
           {/* Baris kontrol: Adzan + Iqomah + lokasi/Ubah + Hijriah dalam SATU baris (boleh wrap),
@@ -548,8 +630,7 @@ const App: React.FC = () => {
                 } ${isPlaying ? 'animate-pulse ring-1 ring-green-400' : ''}`}
             >
               {isMuted ? <VolumeX className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-              <span className="hidden sm:inline">{isMuted ? "Adzan Otomatis Off" : isPlaying ? "Adzan Berkumandang" : "Adzan Otomatis On"}</span>
-              <span className="sm:hidden">{isMuted ? "Adzan Off" : "Adzan On"}</span>
+              <span>{isMuted ? "Adzan Off" : "Adzan On"}</span>
             </button>
 
             {/* Tombol durasi iqomah — buka modal pemilihan durasi */}
@@ -563,6 +644,19 @@ const App: React.FC = () => {
               <span className="hidden sm:inline">Iqomah {iqomahMinutes} menit</span>
               <span className="sm:hidden">Iqomah</span>
             </button>
+
+            {/* Toggle layar penuh versi ikon polos (sm+): ikon saja tanpa pill/label, sama seperti versi mobile. */}
+            {fullscreenDidukung && (
+              <button
+                onClick={handleToggleFullscreen}
+                title={isFullscreen ? "Keluar layar penuh" : "Masuk layar penuh"}
+                aria-label={isFullscreen ? "Keluar layar penuh" : "Masuk layar penuh"}
+                aria-pressed={isFullscreen}
+                className={`hidden sm:flex items-center justify-center min-w-[2.25rem] min-h-[2.25rem] rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70 cursor-pointer ${isFullscreen ? 'text-white' : 'text-sky-300 hover:text-white'}`}
+              >
+                {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+              </button>
+            )}
 
             {!isMuted && notificationPermission === 'granted' && (
               <div className="flex items-center gap-1 px-2 py-1 min-h-[2.25rem] sm:min-h-0 rounded-full text-[10px] bg-sky-500/20 text-sky-300" title={notificationsEnabled ? "Notifikasi aktif" : "Notifikasi nonaktif"}>
