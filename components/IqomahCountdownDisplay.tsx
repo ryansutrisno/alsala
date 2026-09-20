@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlarmClock, Square } from 'lucide-react';
+import { AlarmClock } from 'lucide-react';
 import { formatCountdown } from '../services/iqomahService';
 
 // Fase iqomah: idle (jam normal), counting (hitung mundur), iqomah (waktunya iqomah)
@@ -75,18 +75,10 @@ const IqomahCountdownDisplay: React.FC<IqomahCountdownDisplayProps> = ({
             </div>
             <p className="text-sm sm:text-base text-blue-200/90">Silakan kumandangkan iqomah.</p>
 
-            {alarmPlaying && (
-              <button
-                type="button"
-                onClick={onStopAlarm}
-                title="Matikan Alarm"
-                aria-label="Matikan Alarm"
-                className="mt-1 inline-flex items-center gap-2 rounded-lg bg-amber-500/20 border border-amber-400/50 text-amber-300 px-5 sm:px-7 py-2.5 sm:py-3 text-sm sm:text-base font-semibold hover:bg-amber-500/30 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/70"
-              >
-                <Square className="w-4 h-4 sm:w-5 sm:h-5" />
-                Matikan Alarm
-              </button>
-            )}
+            {/* Tombol "Matikan Alarm" tidak dirender: tampilan ini otomatis kembali
+                ke jam digital setelah IQOMAH_DISPLAY_MS, dan alarm berhenti sendiri
+                (ALARM_MAX_DURATION_MS). Prop alarmPlaying + onStopAlarm tetap ada
+                agar kontrak props dengan App.tsx tidak berubah. */}
           </div>
         </>
       )}
