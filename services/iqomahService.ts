@@ -144,26 +144,33 @@ function scheduleAdzanPattern(alarm: ActiveAlarm, context: AudioContext): void {
 }
 
 function scheduleIqomahPattern(alarm: ActiveAlarm, context: AudioContext): void {
-  let highTone = false;
   const frequencyParam = alarm.oscillator.frequency;
   const gainParam = alarm.gain.gain;
-  const startTime = context.currentTime;
+  const beepDuration = 0.18;
+  const beepGap = 0.18;
+  const groupGap = 1.2;
+  const groupDuration = (beepDuration * 3) + (beepGap * 2) + groupGap;
 
-  frequencyParam.setValueAtTime(740, startTime);
-  gainParam.setValueAtTime(0, startTime);
-  gainParam.linearRampToValueAtTime(ALARM_GAIN, startTime + 0.02);
+  const scheduleBeeps = (): void => {
+    const startTime = context.currentTime;
 
-  const switchTone = (): void => {
-    highTone = !highTone;
-    const switchTime = context.currentTime;
-    const nextFrequency = highTone ? 988 : 740;
+    frequencyParam.setValueAtTime(880, startTime);
+    gainParam.cancelScheduledValues(startTime);
+    gainParam.setValueAtTime(0, startTime);
 
-    frequencyParam.cancelScheduledValues(switchTime);
-    frequencyParam.setValueAtTime(frequencyParam.value, switchTime);
-    frequencyParam.linearRampToValueAtTime(nextFrequency, switchTime + 0.02);
+    for (let index = 0; index < 3; index += 1) {
+      const beepStart = startTime + (index * (beepDuration + beepGap));
+      const beepEnd = beepStart + beepDuration;
+
+      gainParam.setValueAtTime(0, beepStart);
+      gainParam.linearRampToValueAtTime(ALARM_GAIN, beepStart + 0.02);
+      gainParam.setValueAtTime(ALARM_GAIN, beepEnd - 0.02);
+      gainParam.linearRampToValueAtTime(0, beepEnd);
+    }
   };
 
-  alarm.patternTimer = setInterval(switchTone, 700);
+  scheduleBeeps();
+  alarm.patternTimer = setInterval(scheduleBeeps, groupDuration * 1000);
 }
 
 function disconnectAudioNodes(oscillator: OscillatorNode | null, gain: GainNode | null): void {
