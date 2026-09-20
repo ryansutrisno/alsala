@@ -7,8 +7,8 @@ export const fallbackQuotes: InspirationContent[] = [
     reflection: "Setiap cobaan membawa jalan keluarnya sendiri. Bersabarlah."
   },
   {
-    quote: "Shalat adalah tiang agama. Barangsiapa mendirikannya, maka ia telah mendirikan agama.",
-    source: "HR. Baihaqi",
+    quote: "Inti segala perkara adalah Islam dan tiangnya adalah shalat.",
+    source: "HR. Tirmidzi & Ibnu Majah",
     reflection: "Jaga sholatmu, karena ia adalah pondasi kehidupan spiritualmu."
   },
   {
@@ -33,16 +33,16 @@ export const fallbackQuotes: InspirationContent[] = [
   },
   {
     quote: "Barangsiapa yang bertakwa kepada Allah, niscaya Dia akan memberinya jalan keluar.",
-    source: "QS. At-Talaq: 2",
+    source: "QS. At-Talaq: 2-3",
     reflection: "Takwa adalah kunci dari setiap kesulitan hidup."
   },
   {
-    quote: "Rasulullah SAW tidak pernah mengeluh atas suatu kesulitan yang menimpanya.",
+    quote: "Sesungguhnya cobaan yang diberikan kepadaku lebih berat daripada cobaan yang diberikan kepada siapa pun.",
     source: "HR. Bukhari",
     reflection: "Contoh terbaik dalam menghadapi ujian hidup adalah ketabahan Nabi."
   },
   {
-    quote: "Sesungguhnya shalat itu mencegah dari perbuatan keji dan munkar.",
+    quote: "Sesungguhnya shalat itu mencegah dari perbuatan keji dan mungkar.",
     source: "QS. Al-Ankabut: 45",
     reflection: "Shalat bukan hanya ibadah, tapi juga pelindung dari perbuatan tercela."
   },
@@ -63,7 +63,7 @@ export const fallbackQuotes: InspirationContent[] = [
   },
   {
     quote: "Sebaik-baik manusia adalah yang paling bermanfaat bagi manusia.",
-    source: "HR. Ahmad",
+    source: "HR. Thabrani",
     reflection: "Nilai seseorang diukur dari manfaat yang diberikan kepada sesama."
   },
   {
@@ -98,7 +98,7 @@ export const fallbackQuotes: InspirationContent[] = [
   },
   {
     quote: "Tidak sempurna iman seseorang yang makan sementara saudaranya lapar.",
-    source: "HR. Bukhari",
+    source: "HR. Ath-Thabrani",
     reflection: "Kepedulian sosial adalah bagian dari keimanan yang sempurna."
   },
   {
@@ -127,8 +127,8 @@ export const fallbackQuotes: InspirationContent[] = [
     reflection: "Ingatlah bahwa kehidupan ini hanya sementara dan akhirat adalah tujuan kita."
   },
   {
-    quote: "Barangsiapa yang meyakini bahwa Allah akan memberinya rezeki, niscaya Allah akan memberinya rezeki.",
-    source: "HR. Bukhari",
+    quote: "Seandainya kamu bertawakal kepada Allah dengan sebenar-benar tawakal, niscaya Dia akan memberi kamu rezeki sebagaimana Dia memberi rezeki kepada burung.",
+    source: "HR. Tirmidzi",
     reflection: "Keyakinan kepada Allah membuka pintu rezeki yang tak terduga."
   },
   {
@@ -137,8 +137,8 @@ export const fallbackQuotes: InspirationContent[] = [
     reflection: "Kehidupan akhirat adalah tujuan sejati yang lebih baik dari dunia."
   },
   {
-    quote: "Barangsiapa yang berbuat baik bagi perempuan, maka sesungguhnya ia berbuat baik bagi dirinya sendiri.",
-    source: "HR. Bukhari",
+    quote: "Sebaik-baik kalian adalah yang paling baik kepada isterinya, dan aku adalah yang paling baik di antara kalian kepada isteriku.",
+    source: "HR. Tirmidzi",
     reflection: "Berbuat baik kepada perempuan adalah bagian dari akhlak mulia."
   },
   {
