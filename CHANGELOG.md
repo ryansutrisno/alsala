@@ -2,6 +2,12 @@
 
 Semua perubahan yang signifikan pada proyek ini akan didokumentasikan dalam file ini.
 
+## [2.3.1](https://github.com/ryansutrisno/alsala/compare/v2.3.0...v2.3.1) (2026-09-20)
+
+### 🐛 Bug Fixes
+
+* **ui:** tune clock size and compact short-viewport layout ([e1b8c2f](https://github.com/ryansutrisno/alsala/commit/e1b8c2f19014f5381cb848866774318ee22bf520))
+
 ## [2.3.0](https://github.com/ryansutrisno/alsala/compare/v2.2.1...v2.3.0) (2026-09-20)
 
 ### ✨ Features
