@@ -2,6 +2,12 @@
 
 Semua perubahan yang signifikan pada proyek ini akan didokumentasikan dalam file ini.
 
+## [2.2.1](https://github.com/ryansutrisno/alsala/compare/v2.2.0...v2.2.1) (2026-09-20)
+
+### 🐛 Bug Fixes
+
+* **inspiration:** correct quote attributions ([a602763](https://github.com/ryansutrisno/alsala/commit/a602763fb888d745d9c7bbfb57a2dcff0adf1942))
+
 ## [2.2.0](https://github.com/ryansutrisno/alsala/compare/v2.1.2...v2.2.0) (2026-09-19)
 
 ### ✨ Features
