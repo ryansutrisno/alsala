@@ -131,6 +131,21 @@ export default defineConfig(({ mode }) => {
                     statuses: [0, 200]
                   }
                 }
+              },
+              {
+                // Video footage Makkah: di-cache saat runtime, bukan di-precache
+                urlPattern: /\/makkah-.*\.(mp4|jpg)$/i,
+                handler: 'CacheFirst',
+                options: {
+                  cacheName: 'makkah-video-cache',
+                  expiration: {
+                    maxEntries: 6,
+                    maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+                  },
+                  cacheableResponse: {
+                    statuses: [0, 200]
+                  }
+                }
               }
             ]
           },
