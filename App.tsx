@@ -3,14 +3,26 @@ import { MapPin, Navigation, RefreshCw, Search, X, Loader2, Volume2, VolumeX, Be
 import Clock from './components/Clock';
 import PrayerList from './components/PrayerList';
 import InspirationCard from './components/InspirationCard';
+import IqomahCountdown, { type IqomahPhase } from './components/IqomahCountdown';
 import { getPrayerTimes, getNextPrayer, searchLocation } from './services/prayerService';
 import { getDailyInspiration } from './services/quoteService';
 import { schedulePrayerNotifications, clearAllNotifications, requestNotificationPermission, initNotifications, isNotificationSupported, getNotificationPermission } from './services/notificationService';
+import { IQOMAH_OPTIONS, type IqomahMinutes, getIqomahMinutes, setIqomahMinutes, computeIqomahTarget, unlockAlarmAudio, playAlarm, stopAlarm, isAlarmPlaying } from './services/iqomahService';
 import { Coordinates, PrayerApiResponse, InspirationContent, LocationResult } from './types';
 
 // Audio Sources
 const ADHAN_FAJR_URL = '/Adzan_Subuh_Merdu.mp3';
 const ADHAN_GENERAL_URL = '/Adzan_Mekkah_Versi_Full.mp3';
+const REQUIRED_PRAYER_NAMES = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as const;
+const PRAYER_LABELS: Record<(typeof REQUIRED_PRAYER_NAMES)[number], string> = {
+  Fajr: 'Subuh',
+  Dhuhr: 'Dzuhur',
+  Asr: 'Ashar',
+  Maghrib: 'Maghrib',
+  Isha: 'Isya',
+};
+const IQOMAH_GRACE_MS = 10 * 60 * 1000;
+const ALARM_WINDOW_MS = 90 * 1000;
 
 const App: React.FC = () => {
   const [coords, setCoords] = useState<Coordinates | null>(null);
@@ -22,6 +34,9 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showAudioHint, setShowAudioHint] = useState<boolean>(false);
   const [userInteracted, setUserInteracted] = useState<boolean>(false); // Track user interaction
+  const [iqomahMinutes, setIqomahMinutesState] = useState<IqomahMinutes>(() => getIqomahMinutes());
+  const [nowMs, setNowMs] = useState<number>(() => Date.now());
+  const [alarmPlaying, setAlarmPlaying] = useState<boolean>(() => isAlarmPlaying());
   
   // Audio State
   const [isMuted, setIsMuted] = useState<boolean>(() => {
@@ -32,6 +47,7 @@ const App: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastPlayedRef = useRef<string | null>(null);
   const adzanCooldownRef = useRef<number>(0);
+  const firedAlarmsRef = useRef<Record<string, { adzan?: boolean; iqomah?: boolean }>>({});
 
   // Search State
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -49,6 +65,80 @@ const App: React.FC = () => {
     }
     return 'denied';
   });
+
+  // Turunkan fase iqomah langsung dari waktu sholat hari ini agar aman setelah reload.
+  const iqomahStatus: {
+    phase: IqomahPhase;
+    activePrayerName: string | null;
+    msLeft: number | null;
+  } = (() => {
+    if (!prayerData) {
+      return { phase: 'idle', activePrayerName: null, msLeft: null };
+    }
+
+    let relevantPrayer: {
+      phase: IqomahPhase;
+      activePrayerName: string;
+      msLeft: number | null;
+      prayerTimeMs: number;
+    } | null = null;
+    const now = new Date(nowMs);
+
+    for (const prayerName of REQUIRED_PRAYER_NAMES) {
+      const cleanTime = prayerData.data.timings[prayerName].split(' ')[0];
+      const prayerDate = computeIqomahTarget(cleanTime, 0, now);
+      const iqomahTarget = computeIqomahTarget(cleanTime, iqomahMinutes, now);
+
+      if (!prayerDate || !iqomahTarget) {
+        continue;
+      }
+
+      const prayerTimeMs = prayerDate.getTime();
+      const iqomahTargetMs = iqomahTarget.getTime();
+      let phase: IqomahPhase | null = null;
+      let msLeft: number | null = null;
+
+      if (nowMs >= prayerTimeMs && nowMs < iqomahTargetMs) {
+        phase = 'counting';
+        msLeft = iqomahTargetMs - nowMs;
+      } else if (nowMs >= iqomahTargetMs && nowMs < iqomahTargetMs + IQOMAH_GRACE_MS) {
+        phase = 'iqomah';
+        msLeft = 0;
+      }
+
+      if (phase && (!relevantPrayer || prayerTimeMs > relevantPrayer.prayerTimeMs)) {
+        relevantPrayer = {
+          phase,
+          activePrayerName: PRAYER_LABELS[prayerName],
+          msLeft,
+          prayerTimeMs,
+        };
+      }
+    }
+
+    return relevantPrayer
+      ? {
+          phase: relevantPrayer.phase,
+          activePrayerName: relevantPrayer.activePrayerName,
+          msLeft: relevantPrayer.msLeft,
+        }
+      : { phase: 'idle', activePrayerName: null, msLeft: null };
+  })();
+
+  const handleIqomahMinutesChange = (minutes: number): void => {
+    if (!IQOMAH_OPTIONS.includes(minutes as IqomahMinutes)) {
+      return;
+    }
+
+    const validMinutes = minutes as IqomahMinutes;
+    setIqomahMinutesState(validMinutes);
+    setIqomahMinutes(validMinutes);
+  };
+
+  const handleStopAlarm = (): void => {
+    stopAlarm();
+    setAlarmPlaying(false);
+  };
 
   // Fallback to Monas, Jakarta if geolocation fails
   const DEFAULT_COORDS = { latitude: -6.1751, longitude: 106.8650, locationName: "Jakarta Pusat" };
@@ -127,9 +217,12 @@ const App: React.FC = () => {
   // Timer for Next Prayer & Adhan Check
   useEffect(() => {
     const interval = setInterval(() => {
-      if (!prayerData) return;
-
       const now = new Date();
+      setNowMs(now.getTime());
+      if (!prayerData) {
+        setAlarmPlaying(isAlarmPlaying());
+        return;
+      }
       
       // Update Next Prayer Countdown
       const next = getNextPrayer(prayerData.data.timings);
@@ -210,10 +303,55 @@ const App: React.FC = () => {
         });
       }
 
+      // Putar alarm hanya di sekitar waktu kejadian agar tidak berbunyi basi setelah reload.
+      REQUIRED_PRAYER_NAMES.forEach((prayerName) => {
+        const cleanTime = prayerData.data.timings[prayerName].split(' ')[0];
+        const prayerDate = computeIqomahTarget(cleanTime, 0, now);
+        const iqomahTarget = computeIqomahTarget(cleanTime, iqomahMinutes, now);
+
+        if (!prayerDate || !iqomahTarget) {
+          return;
+        }
+
+        const dateKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}-${prayerName}`;
+        const fired = firedAlarmsRef.current[dateKey] ?? {};
+        firedAlarmsRef.current[dateKey] = fired;
+
+        if (
+          isMuted &&
+          !fired.adzan &&
+          Math.abs(now.getTime() - prayerDate.getTime()) <= ALARM_WINDOW_MS
+        ) {
+          fired.adzan = true;
+          playAlarm('adzan-manual');
+        }
+
+        if (
+          !fired.iqomah &&
+          Math.abs(now.getTime() - iqomahTarget.getTime()) <= ALARM_WINDOW_MS
+        ) {
+          fired.iqomah = true;
+          playAlarm('iqomah');
+        }
+      });
+
+      setAlarmPlaying(isAlarmPlaying());
+
     }, 1000); // Check every second for precision
 
     return () => clearInterval(interval);
-  }, [prayerData, isMuted]);
+  }, [prayerData, isMuted, iqomahMinutes]);
+
+  // Buka kunci Web Audio pada interaksi pertama pengguna.
+  useEffect(() => {
+    const handlePointerDown = (): void => {
+      unlockAlarmAudio();
+      window.removeEventListener('pointerdown', handlePointerDown);
+    };
+
+    window.addEventListener('pointerdown', handlePointerDown, { once: true });
+    return () => window.removeEventListener('pointerdown', handlePointerDown);
+  }, []);
 
   // Hint Timer
   useEffect(() => {
@@ -289,6 +427,7 @@ const App: React.FC = () => {
   }, []);
 
   const toggleMute = async () => {
+    unlockAlarmAudio();
     const newMutedState = !isMuted;
     setIsMuted(newMutedState);
     setShowAudioHint(false);
@@ -495,7 +634,20 @@ const App: React.FC = () => {
                   )}
               </div>
 
-               {/* Inspiration Section (Desktop Only) */}
+               {/* Kontrol iqomah */}
+               <section className="w-full max-w-md mx-auto">
+                 <IqomahCountdown
+                   phase={iqomahStatus.phase}
+                   activePrayerName={iqomahStatus.activePrayerName}
+                   msLeft={iqomahStatus.msLeft}
+                   minutes={iqomahMinutes}
+                   onMinutesChange={handleIqomahMinutesChange}
+                   adzanReminder={isMuted && iqomahStatus.phase === 'counting'}
+                   alarmPlaying={alarmPlaying}
+                   onStopAlarm={handleStopAlarm}
+                 />
+               </section>
+
                <section className="w-full max-w-md mx-auto hidden lg:block">
                  <InspirationCard content={inspiration} loading={loadingInspiration} />
                </section>
