@@ -2,6 +2,41 @@
 
 Semua perubahan yang signifikan pada proyek ini akan didokumentasikan dalam file ini.
 
+## [2.3.0](https://github.com/ryansutrisno/alsala/compare/v2.2.1...v2.3.0) (2026-09-20)
+
+### ✨ Features
+
+* **alarm:** differentiate manual-adzan and iqomah tones ([8bc70f8](https://github.com/ryansutrisno/alsala/commit/8bc70f87fc4140bad221291c557e18ef48e4d7e7))
+* **alarm:** use repeating beeps instead of siren for iqomah ([8b7f47d](https://github.com/ryansutrisno/alsala/commit/8b7f47d9e4eed9dbbb765559f04878bccb0f85c3))
+* **footage:** add rotating Makkah video panel by prayer range ([fbd8751](https://github.com/ryansutrisno/alsala/commit/fbd87518cab0a2997479ba67f2746ead80ddc8b3))
+* **iqomah:** add iqomah service with web audio alarm ([ec5c281](https://github.com/ryansutrisno/alsala/commit/ec5c28146feb775aacff6426ba12551138d2d1a1))
+* **iqomah:** wire countdown and alarms into the app ([ac35700](https://github.com/ryansutrisno/alsala/commit/ac35700ba62a952b9c30559254bf6f903e2351b3))
+* **ui:** add fullscreen toggle and simplify header labels ([6089dcc](https://github.com/ryansutrisno/alsala/commit/6089dcc97a483c314140ade26623cf1a4d57f7c1))
+* **ui:** add iqomah countdown card ([2910430](https://github.com/ryansutrisno/alsala/commit/291043031a9f8515ae92f5325a95b0a79ba06e09))
+* **ui:** responsive layout for landscape and smart TV ([8f6441e](https://github.com/ryansutrisno/alsala/commit/8f6441e1b52060020b3d92cf48f7e73ad4c8d2f8))
+
+### 🐛 Bug Fixes
+
+* **inspiration:** strip footnote markup from quote text ([198f864](https://github.com/ryansutrisno/alsala/commit/198f8644ecf34e359e4bec9c39bd187dfe8ee500))
+* **iqomah:** stop alarms firing before their target time ([f0240fd](https://github.com/ryansutrisno/alsala/commit/f0240fd42f27243efb3c6a0dba91757f68431820))
+* **ui:** compact mobile portrait header layout ([55ed96d](https://github.com/ryansutrisno/alsala/commit/55ed96d00101576c1bb4c8d4d0f1275887bbe22e))
+* **ui:** drop manual-adzan hint from iqomah countdown ([7cca527](https://github.com/ryansutrisno/alsala/commit/7cca527c7ef98d75fb872cd7cf453073fbddd2e9))
+* **ui:** use Ahad spelling for the day name ([2cfb738](https://github.com/ryansutrisno/alsala/commit/2cfb738958017d01443e806ceb41980bebce0eb3))
+
+### 📚 Documentation
+
+* rewrite README with current features ([149bd69](https://github.com/ryansutrisno/alsala/commit/149bd69f5a727e916f9a8143ea15fb38fa3ba332))
+
+### 📦 Code Refactoring
+
+* **inspiration:** fixed-height marquee card for daily quote ([5e55d9c](https://github.com/ryansutrisno/alsala/commit/5e55d9c1b0490519184f4681c6f2c35abf1152ce))
+* **ui:** move iqomah duration to a modal and restore single-column layout ([3f2c258](https://github.com/ryansutrisno/alsala/commit/3f2c258fcadb3b713c782ccc5c9a9ec1cba2c5ac))
+* **ui:** remove stop-alarm button from iqomah countdown ([3674512](https://github.com/ryansutrisno/alsala/commit/3674512c1aaaf40975d996714edb737daadb5a29))
+
+### ⚙️ Chores
+
+* **gitignore:** ignore vite-plugin-pwa dev-dist output ([9878b2b](https://github.com/ryansutrisno/alsala/commit/9878b2ba83bea0dabe91afbbae1c3249529d61e9))
+
 ## [2.2.1](https://github.com/ryansutrisno/alsala/compare/v2.2.0...v2.2.1) (2026-09-20)
 
 ### 🐛 Bug Fixes
