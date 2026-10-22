@@ -2,6 +2,12 @@
 
 Semua perubahan yang signifikan pada proyek ini akan didokumentasikan dalam file ini.
 
+## [2.3.2](https://github.com/ryansutrisno/alsala/compare/v2.3.1...v2.3.2) (2026-10-22)
+
+### 🐛 Bug Fixes
+
+* **quotes:** Show surah name in daily inspiration attribution ([5a187d0](https://github.com/ryansutrisno/alsala/commit/5a187d02ed41fb5f06ad086682b8ac84acd0b76a))
+
 ## [2.3.1](https://github.com/ryansutrisno/alsala/compare/v2.3.0...v2.3.1) (2026-09-20)
 
 ### 🐛 Bug Fixes

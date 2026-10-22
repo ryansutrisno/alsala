@@ -1,7 +1,7 @@
 {
   "name": "alsala",
   "private": true,
-  "version": "2.3.1",
+  "version": "2.3.2",
   "type": "module",
   "description": "Aplikasi jadwal sholat modern yang akurat, estetis, dan responsif",
   "author": "Ryan Sutrisno",
