@@ -551,6 +551,145 @@ function getVerseTranslation(verse: Record<string, unknown>): string | null {
   return text ? bersihkanTeksTerjemahan(text) : null;
 }
 
+// Nama surat versi Kemenag (1–114), dipakai agar atribusi ayat tidak hanya
+// menampilkan nomor surat seperti "69:15". Disimpan lokal supaya tetap
+// tersedia offline dan konsisten dengan 87 kutipan statis di atas.
+const NAMA_SURAH: readonly string[] = [
+  'Al-Fatihah',
+  'Al-Baqarah',
+  "Ali 'Imran",
+  'An-Nisa',
+  "Al-Ma'idah",
+  "Al-An'am",
+  "Al-A'raf",
+  'Al-Anfal',
+  'At-Taubah',
+  'Yunus',
+  'Hud',
+  'Yusuf',
+  "Ar-Ra'd",
+  'Ibrahim',
+  'Al-Hijr',
+  'An-Nahl',
+  'Al-Isra',
+  'Al-Kahf',
+  'Maryam',
+  'Taha',
+  'Al-Anbiya',
+  'Al-Hajj',
+  "Al-Mu'minun",
+  'An-Nur',
+  'Al-Furqan',
+  "Asy-Syu'ara",
+  'An-Naml',
+  'Al-Qasas',
+  'Al-Ankabut',
+  'Ar-Rum',
+  'Luqman',
+  'As-Sajdah',
+  'Al-Ahzab',
+  'Saba',
+  'Fatir',
+  'Yasin',
+  'As-Saffat',
+  'Sad',
+  'Az-Zumar',
+  'Gafir',
+  'Fussilat',
+  'Asy-Syura',
+  'Az-Zukhruf',
+  'Ad-Dukhan',
+  'Al-Jasiyah',
+  'Al-Ahqaf',
+  'Muhammad',
+  'Al-Fath',
+  'Al-Hujurat',
+  'Qaf',
+  'Az-Zariyat',
+  'At-Tur',
+  'An-Najm',
+  'Al-Qamar',
+  'Ar-Rahman',
+  "Al-Waqi'ah",
+  'Al-Hadid',
+  'Al-Mujadilah',
+  'Al-Hasyr',
+  'Al-Mumtahanah',
+  'As-Saff',
+  "Al-Jumu'ah",
+  'Al-Munafiqun',
+  'At-Tagabun',
+  'At-Talaq',
+  'At-Tahrim',
+  'Al-Mulk',
+  'Al-Qalam',
+  'Al-Haqqah',
+  "Al-Ma'arij",
+  'Nuh',
+  'Al-Jinn',
+  'Al-Muzzammil',
+  'Al-Muddassir',
+  'Al-Qiyamah',
+  'Al-Insan',
+  'Al-Mursalat',
+  'An-Naba',
+  "An-Nazi'at",
+  "'Abasa",
+  'At-Takwir',
+  'Al-Infitar',
+  'Al-Mutaffifin',
+  'Al-Insyiqaq',
+  'Al-Buruj',
+  'At-Tariq',
+  "Al-A'la",
+  'Al-Gasyiyah',
+  'Al-Fajr',
+  'Al-Balad',
+  'Asy-Syams',
+  'Al-Lail',
+  'Ad-Duha',
+  'Al-Insyirah',
+  'At-Tin',
+  'Al-Alaq',
+  'Al-Qadr',
+  'Al-Bayyinah',
+  'Az-Zalzalah',
+  "Al-'Adiyat",
+  "Al-Qari'ah",
+  'At-Takasur',
+  "Al-'Asr",
+  'Al-Humazah',
+  'Al-Fil',
+  'Quraisy',
+  "Al-Ma'un",
+  'Al-Kausar',
+  'Al-Kafirun',
+  'An-Nasr',
+  'Al-Lahab',
+  'Al-Ikhlas',
+  'Al-Falaq',
+  'An-Nas',
+];
+
+function getNamaSurah(nomor: number): string | null {
+  return Number.isInteger(nomor) && nomor >= 1 && nomor <= NAMA_SURAH.length
+    ? NAMA_SURAH[nomor - 1]
+    : null;
+}
+
+// Menormalkan kunci ayat ("69:15") menjadi atribusi bernama surat
+// ("QS. Al-Haqqah: 15 — Terjemahan Kemenag").
+function formatSumberAyat(verseKey: string): string {
+  const [surahText, ayahText] = verseKey.split(':');
+  const namaSurah = getNamaSurah(Number(surahText));
+
+  if (!namaSurah || !ayahText) {
+    return `QS. ${verseKey} — Terjemahan Kemenag`;
+  }
+
+  return `QS. ${namaSurah}: ${ayahText} — Terjemahan Kemenag`;
+}
+
 function parseIslamicApp(data: unknown): InspirationContent | null {
   if (!isRecord(data) || !isRecord(data.data) || !isRecord(data.data.verse)) {
     return null;
@@ -566,7 +705,7 @@ function parseIslamicApp(data: unknown): InspirationContent | null {
 
   return {
     quote,
-    source: `QS. ${verseKey} — Terjemahan Kemenag`,
+    source: formatSumberAyat(verseKey),
   };
 }
 
@@ -585,7 +724,7 @@ function parseQuranCom(data: unknown): InspirationContent | null {
 
   return {
     quote,
-    source: `QS. ${verseKey} — Terjemahan Kemenag`,
+    source: formatSumberAyat(verseKey),
   };
 }
 
@@ -602,16 +741,22 @@ function parseAlquranCloud(data: unknown): InspirationContent | null {
     return null;
   }
 
-  const englishName = getNonEmptyString(surah.englishName);
+  const nomorSurah = surah.number;
   const numberInSurah = verse.numberInSurah;
 
-  if (!quote || !englishName || typeof numberInSurah !== 'number' || !Number.isFinite(numberInSurah)) {
+  if (
+    !quote ||
+    typeof nomorSurah !== 'number' ||
+    typeof numberInSurah !== 'number' ||
+    !Number.isFinite(nomorSurah) ||
+    !Number.isFinite(numberInSurah)
+  ) {
     return null;
   }
 
   return {
     quote,
-    source: `QS. ${englishName}: ${numberInSurah} — Terjemahan Kemenag`,
+    source: formatSumberAyat(`${nomorSurah}:${numberInSurah}`),
   };
 }
 

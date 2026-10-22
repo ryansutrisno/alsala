@@ -198,7 +198,7 @@ const InspirationCard: React.FC<InspirationCardProps> = ({ content, loading }) =
 
           {/* Sumber tetap diam di kanan bawah, di luar area bergulir */}
           <div className="flex justify-end border-t border-white/10 pt-3 sm:pt-4">
-            <div className="flex items-center text-sky-400 text-xs sm:text-sm lg:text-base font-medium whitespace-nowrap bg-sky-500/10 px-2 sm:px-3 py-1 rounded-full">
+            <div className="flex items-center max-w-full text-sky-400 text-xs sm:text-sm lg:text-base font-medium whitespace-normal text-right leading-snug bg-sky-500/10 px-2 sm:px-3 py-1 rounded-full">
               <span>{displayed.source}</span>
             </div>
           </div>
